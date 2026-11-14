@@ -6,12 +6,15 @@ __pycache__/
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
 
-# Environments
+# Environments & Local Secrets
 .env
 .venv
 env/
 venv/
 ENV/
+
+# Local Chat Session Store
+chat_history_store.json
 
 # IDE settings
 .vscode/
