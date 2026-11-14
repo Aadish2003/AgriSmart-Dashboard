@@ -350,11 +350,12 @@ def generate_dynamic_chart(query: str) -> go.Figure:
     df = get_df()
 
     theme = dict(
-        template="plotly_dark",
-        paper_bgcolor="#0F1713",
-        plot_bgcolor="#0F1713",
-        font=dict(family="Arial, sans-serif", color="#E0E6E2"),
-        margin=dict(l=40, r=40, t=60, b=50),
+        template="plotly_white",
+        paper_bgcolor="#FFFFFF",
+        plot_bgcolor="#F8FAF8",
+        font=dict(family="Arial, sans-serif", color="#17452D", size=11),
+        margin=dict(l=40, r=40, t=45, b=40),
+        height=300,
     )
 
     # 1. ML Prediction / Sensitivity / Feature Impact

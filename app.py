@@ -1032,13 +1032,43 @@ def open_agrosense_ai_dialog():
         box-shadow: 0 24px 70px rgba(23, 69, 45, 0.25) !important;
         color: #17452D !important;
         opacity: 1 !important;
-        max-height: 90vh !important;
-        overflow-y: hidden !important; /* CRITICAL: Entire modal frame will NOT scroll */
+        max-height: 92vh !important;
+        overflow-y: auto !important; /* Graceful scroll fallback on tiny screens */
         overflow-x: hidden !important;
     }
     div[data-testid="stDialog"] [role="dialog"] > div {
-        overflow-y: hidden !important;
+        overflow-y: visible !important;
         overflow-x: hidden !important;
+    }
+
+    /* Pinned, high-contrast, crystal-clear Chat Input Bar */
+    div[data-testid="stDialog"] div[data-testid="stChatInput"] {
+        margin-top: 10px !important;
+        margin-bottom: 4px !important;
+        width: 100% !important;
+        position: relative !important;
+        z-index: 100 !important;
+    }
+    div[data-testid="stDialog"] div[data-testid="stChatInput"] textarea {
+        background-color: #FFFFFF !important;
+        border: 2px solid #246B42 !important;
+        border-radius: 12px !important;
+        color: #17452D !important;
+        font-size: 0.96rem !important;
+        font-weight: 600 !important;
+        box-shadow: 0 3px 12px rgba(23, 69, 45, 0.10) !important;
+        padding: 12px 16px !important;
+    }
+    div[data-testid="stDialog"] div[data-testid="stChatInput"] textarea:focus {
+        border-color: #00C853 !important;
+        box-shadow: 0 0 0 3px rgba(0, 200, 83, 0.25) !important;
+    }
+    div[data-testid="stDialog"] div[data-testid="stChatInput"] textarea::placeholder {
+        color: #557A60 !important;
+        font-weight: 550 !important;
+    }
+    div[data-testid="stDialog"] div[data-testid="stChatInput"] button {
+        color: #246B42 !important;
     }
 
     /* Clean custom scrollbar for messages and session history */
@@ -1247,7 +1277,7 @@ def open_agrosense_ai_dialog():
         st.markdown('<p style="font-size:0.78rem; color:#205B38; font-weight:800; text-transform:uppercase; margin-top:14px; margin-bottom:8px; letter-spacing:0.7px;">Recent Briefings</p>', unsafe_allow_html=True)
 
         # List of past chat sessions in a fixed-height scrollable container
-        with st.container(height=310, border=False):
+        with st.container(height=260, border=False):
             if all_sessions:
                 for s in all_sessions[:12]:
                     is_active = (s["id"] == st.session_state["active_session_id"])
@@ -1308,9 +1338,9 @@ def open_agrosense_ai_dialog():
         messages = current_session.get("messages", [])
 
         # =====================================================================
-        # SCROLLABLE MESSAGE CONTAINER (ONLY MESSAGES SCROLL, FIXED 520PX)
+        # SCROLLABLE MESSAGE CONTAINER (ONLY MESSAGES SCROLL, FIXED 370PX)
         # =====================================================================
-        with st.container(height=520, border=False, autoscroll=True):
+        with st.container(height=370, border=False, autoscroll=True):
             # --- If no messages: Hero Greeting & Suggestion Chips (Gemini/Claude style) ---
             if not messages:
                 st.markdown("""
