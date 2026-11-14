@@ -175,6 +175,7 @@ PAGES = [
     "Profitability Model Evaluation",
     "Crop Yield Forecasting",
     "Farmer Profitability Prediction",
+    "🤖 AgroSense AI",
 ]
 
 
@@ -1007,6 +1008,189 @@ def render_cv_section(kind, best_name):
 
 
 # =====================================================
+# 19b. AGROSENSE AI CHATBOT PAGE
+# =====================================================
+
+def show_agrosense_ai():
+    """AgroSense AI — RAG-powered agricultural chatbot."""
+
+    # --- CSS for chat bubbles ---
+    st.markdown("""
+    <style>
+    .chat-container { max-width: 860px; margin: 0 auto; }
+
+    .user-bubble {
+        background: #246B42;
+        color: #FFFFFF;
+        border-radius: 18px 18px 4px 18px;
+        padding: 12px 18px;
+        margin: 8px 0 8px 60px;
+        font-size: 0.97rem;
+        line-height: 1.55;
+        word-wrap: break-word;
+    }
+    .ai-bubble {
+        background: #FFFFFF;
+        color: #17452D;
+        border: 1px solid #DCE7DD;
+        border-radius: 18px 18px 18px 4px;
+        padding: 14px 20px;
+        margin: 8px 60px 8px 0;
+        font-size: 0.97rem;
+        line-height: 1.6;
+        word-wrap: break-word;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+    .avatar-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 4px; }
+    .avatar-ai  { font-size: 1.6rem; }
+    .avatar-user{ font-size: 1.6rem; justify-content: flex-end; }
+    .msg-meta   { font-size: 0.75rem; color: #7A9981; margin-bottom: 2px; }
+    .thinking-dot { animation: blink 1s step-start infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # --- Page header ---
+    col_logo, col_title = st.columns([1, 11])
+    with col_logo:
+        st.markdown("<div style='font-size:3rem; padding-top:8px'>🤖</div>", unsafe_allow_html=True)
+    with col_title:
+        st.markdown(
+            "<h1 style='margin-bottom:0'>AgroSense AI</h1>"
+            "<p style='color:#4B6251; margin-top:2px'>Executive Agricultural Intelligence Assistant — Powered by Groq LLM & FAISS RAG</p>",
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("---")
+
+    # --- Check dependencies ---
+    try:
+        from chatbot import check_availability, get_vector_store, chat as agro_chat
+        avail = check_availability()
+    except ImportError as e:
+        st.error(f"⚠️ chatbot.py import error: {e}")
+        st.info("Make sure chatbot.py is in the same folder as app.py.")
+        return
+
+    missing = [k for k, v in avail.items() if not v]
+    if missing:
+        st.error(
+            f"Missing requirements: {', '.join(missing)}. "
+            "Run: `pip install groq faiss-cpu sentence-transformers python-dotenv`"
+        )
+        return
+
+    # --- Initialize vector store (cached across reruns) ---
+    if "agro_vs_ready" not in st.session_state:
+        with st.spinner("🔧 Building knowledge base from dataset — first load only, please wait…"):
+            try:
+                get_vector_store()
+                st.session_state["agro_vs_ready"] = True
+            except Exception as e:
+                st.error(f"Vector store build failed: {e}")
+                return
+
+    # --- Session state for messages ---
+    if "agro_messages" not in st.session_state:
+        st.session_state["agro_messages"] = []
+
+    # --- Sidebar: chat history & controls ---
+    with st.sidebar:
+        st.markdown("### 💬 Chat History")
+        if st.session_state["agro_messages"]:
+            user_turns = [
+                m["content"]
+                for m in st.session_state["agro_messages"]
+                if m["role"] == "user"
+            ]
+            for i, q in enumerate(user_turns[-8:], 1):
+                display_q = q[:55] + "…" if len(q) > 55 else q
+                st.caption(f"{i}. {display_q}")
+        else:
+            st.caption("No messages yet.")
+
+        st.markdown("---")
+        if st.button("🗑️ Clear Chat", key="agro_clear"):
+            st.session_state["agro_messages"] = []
+            st.rerun()
+
+        st.markdown("---")
+        st.markdown("**💡 Sample Questions**")
+        sample_questions = [
+            "Which state has the highest yield?",
+            "Show me yield by crop",
+            "What is the most profitable crop?",
+            "Compare profit by state",
+            "Show yield trend over years",
+            "Which irrigation method works best?",
+            "What crops grow best in Kharif season?",
+            "Compare soil types by yield",
+            "Top 5 state-crop combinations?",
+            "Rainfall vs yield relationship?",
+        ]
+        for sq in sample_questions:
+            if st.button(sq, key=f"sq_{sq[:20]}", use_container_width=True):
+                st.session_state["agro_pending_question"] = sq
+                st.rerun()
+
+    # --- Display message history (ChatGPT / Gemini / Claude structure) ---
+    for msg in st.session_state["agro_messages"]:
+        if msg["role"] == "user":
+            with st.chat_message("user", avatar="🧑‍🌾"):
+                st.markdown(msg["content"])
+        else:
+            with st.chat_message("assistant", avatar="🤖"):
+                st.markdown(msg["content"])
+                if msg.get("chart") is not None:
+                    try:
+                        st.plotly_chart(msg["chart"], use_container_width=True)
+                    except Exception:
+                        pass
+
+    # --- Handle pending question from sidebar buttons ---
+    pending = st.session_state.pop("agro_pending_question", None)
+
+    # --- Chat input ---
+    user_input = st.chat_input(
+        "Ask me anything about Indian agriculture, yield, profit, crops, states…",
+        key="agro_input",
+    )
+
+    query = pending or user_input
+
+    if query:
+        st.session_state["agro_messages"].append({"role": "user", "content": query})
+
+        with st.spinner("🤔 AgroSense AI is analysing your question…"):
+            try:
+                answer, fig = agro_chat(
+                    query,
+                    [m for m in st.session_state["agro_messages"] if m["role"] != "system"],
+                )
+                ai_msg = {"role": "assistant", "content": answer, "chart": fig}
+                st.session_state["agro_messages"].append(ai_msg)
+            except Exception as e:
+                err_msg = (
+                    f"⚠️ I encountered an error: `{e}`. "
+                    "Please check your GROQ_API_KEY in the .env file and ensure internet access."
+                )
+                st.session_state["agro_messages"].append(
+                    {"role": "assistant", "content": err_msg, "chart": None}
+                )
+
+        st.rerun()
+
+    # --- Welcome message when no history ---
+    if not st.session_state["agro_messages"]:
+        st.info(
+            "👋 **Welcome to AgroSense AI!** I'm your agricultural intelligence assistant.\n\n"
+            "I can answer questions about crop yields, profitability, states, seasons, soil types, "
+            "irrigation methods, and market prices — all grounded in the AgriSmart dataset.\n\n"
+            "**Try asking:** *'Which state has the highest average yield?'* or *'Show me profit by crop'*"
+        )
+
+
+# =====================================================
 # 13. PAGE: DASHBOARD OVERVIEW
 # =====================================================
 
@@ -1555,6 +1739,10 @@ elif page == "Farmer Profitability Prediction":
             """)
 
 
+
+
+elif page == "🤖 AgroSense AI":
+    show_agrosense_ai()
 # =====================================================
 # 20. FOOTER
 # =====================================================

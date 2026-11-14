@@ -7,3 +7,7 @@ matplotlib
 seaborn
 joblib
 jupyter
+groq
+faiss-cpu
+sentence-transformers
+python-dotenv
