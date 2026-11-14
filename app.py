@@ -175,7 +175,6 @@ PAGES = [
     "Profitability Model Evaluation",
     "Crop Yield Forecasting",
     "Farmer Profitability Prediction",
-    "🤖 AgroSense AI",
 ]
 
 
@@ -1008,52 +1007,52 @@ def render_cv_section(kind, best_name):
 
 
 # =====================================================
-# 19b. AGROSENSE AI ADVANCED ENTERPRISE COMMAND CENTER
+# 19b. AGROSENSE AI ENTERPRISE DIALOG MODAL & FLOATING BUBBLE
 # =====================================================
 
-def show_agrosense_ai():
-    """AgroSense AI — Advanced Enterprise RAG Command Center."""
+@st.dialog("🤖 AgroSense AI • Executive Agricultural Assistant", width="large")
+def open_agrosense_ai_dialog():
+    """Renders the complete AgroSense AI Enterprise Command Center inside a modern modal dialog."""
 
-    # --- Modern Glassmorphism & Status Bar CSS ---
+    # --- Modern Glassmorphism & Styling CSS inside Dialog ---
     st.markdown("""
     <style>
-    .ai-hero-header {
+    .ai-dialog-header {
         background: linear-gradient(135deg, #0e2a1b 0%, #17452D 50%, #246B42 100%);
         border: 1px solid #368254;
-        border-radius: 16px;
-        padding: 24px 30px;
-        margin-bottom: 22px;
-        box-shadow: 0 8px 30px rgba(14,42,27,0.18);
+        border-radius: 14px;
+        padding: 20px 24px;
+        margin-bottom: 18px;
         color: #FFFFFF;
+        box-shadow: 0 6px 20px rgba(14,42,27,0.15);
     }
-    .ai-hero-title {
-        font-size: 2.1rem;
-        font-weight: 850;
+    .ai-dialog-title {
+        font-size: 1.85rem;
+        font-weight: 800;
         color: #FFFFFF !important;
         margin: 0;
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
     }
-    .ai-hero-sub {
-        font-size: 1.02rem;
+    .ai-dialog-sub {
+        font-size: 0.95rem;
         color: #A3D9B5 !important;
-        margin-top: 6px;
-        margin-bottom: 16px;
+        margin-top: 4px;
+        margin-bottom: 12px;
     }
     .status-badge-strip {
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 10px;
+        gap: 8px;
     }
     .status-badge {
         background: rgba(255, 255, 255, 0.12);
         backdrop-filter: blur(8px);
-        border: 1px solid rgba(255, 255, 255, 0.22);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         border-radius: 20px;
-        padding: 5px 14px;
-        font-size: 0.82rem;
+        padding: 4px 12px;
+        font-size: 0.78rem;
         font-weight: 600;
         color: #E8F5E9 !important;
         display: inline-flex;
@@ -1061,68 +1060,39 @@ def show_agrosense_ai():
         gap: 6px;
     }
     .status-dot-green {
-        width: 8px;
-        height: 8px;
+        width: 7px;
+        height: 7px;
         background-color: #00E676;
         border-radius: 50%;
-        box-shadow: 0 0 8px #00E676;
-    }
-    .chat-card-user {
-        background: #F0F6F1;
-        border-left: 4px solid #246B42;
-        border-radius: 12px;
-        padding: 14px 18px;
-        margin: 10px 0;
-    }
-    .chat-card-ai {
-        background: #FFFFFF;
-        border: 1px solid #DCE7DD;
-        border-left: 4px solid #00C853;
-        border-radius: 12px;
-        padding: 18px 22px;
-        margin: 12px 0;
-        box-shadow: 0 4px 14px rgba(23,69,45,0.06);
+        box-shadow: 0 0 7px #00E676;
     }
     </style>
     """, unsafe_allow_html=True)
 
     # --- Header Hero Banner ---
     st.markdown("""
-    <div class="ai-hero-header">
-        <div class="ai-hero-title">🤖 AgroSense AI <span style="font-size:1.1rem; font-weight:500; background:#00E676; color:#0e2a1b; padding:3px 10px; border-radius:12px;">ENTERPRISE COPILOT</span></div>
-        <div class="ai-hero-sub">Senior Agricultural Decision Support System • RAG Ground-Truth Architecture • Zero Hallucination</div>
+    <div class="ai-dialog-header">
+        <div class="ai-dialog-title">🤖 AgroSense AI <span style="font-size:1rem; font-weight:600; background:#00E676; color:#0e2a1b; padding:2px 8px; border-radius:10px;">EXECUTIVE ADVISOR</span></div>
+        <div class="ai-dialog-sub">Senior Agricultural Decision Support System • RAG Ground-Truth Architecture • Zero Hallucination</div>
         <div class="status-badge-strip">
             <span class="status-badge"><span class="status-dot-green"></span> Groq Cloud LPU Accelerated</span>
-            <span class="status-badge"><span class="status-dot-green"></span> FAISS Vector Index (115 Domain Nodes)</span>
+            <span class="status-badge"><span class="status-dot-green"></span> FAISS Vector Index (115 Nodes)</span>
             <span class="status-badge"><span class="status-dot-green"></span> 7,920 Verified Records (2014–2024)</span>
             <span class="status-badge">🛡️ Ground-Truth Constrained</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # --- Check dependencies ---
-    try:
-        import chatbot
-        avail = chatbot.check_availability()
-    except ImportError as e:
-        st.error(f"⚠️ chatbot.py module error: {e}")
-        return
+    import chatbot
 
-    missing = [k for k, v in avail.items() if not v]
-    if missing:
-        st.error(f"Missing configuration: {', '.join(missing)}. Please check your .env file.")
-        return
-
-    # --- Initialize session state ---
+    # Initialize active session
     if "active_session_id" not in st.session_state:
-        # Check if existing sessions exist
         existing = chatbot.load_all_sessions()
         if existing:
             st.session_state["active_session_id"] = existing[0]["id"]
         else:
-            st.session_state["active_session_id"] = chatbot.create_new_session("Initial AgriSmart Briefing")
+            st.session_state["active_session_id"] = chatbot.create_new_session("Initial Agricultural Briefing")
 
-    # Load sessions from disk
     all_sessions = chatbot.load_all_sessions()
     current_session = next((s for s in all_sessions if s["id"] == st.session_state["active_session_id"]), None)
 
@@ -1131,29 +1101,28 @@ def show_agrosense_ai():
         all_sessions = chatbot.load_all_sessions()
         current_session = all_sessions[0]
 
-    # --- TOP CONTROL BAR: Sessions, New Chat, Export, Clear ---
-    ctrl_col1, ctrl_col2, ctrl_col3, ctrl_col4 = st.columns([4, 2, 2, 2])
+    # --- TOP CONTROL BAR: Sessions, New Chat, Export, Clear, Close ---
+    ctrl_col1, ctrl_col2, ctrl_col3, ctrl_col4, ctrl_col5 = st.columns([4, 2, 2, 2, 2])
     with ctrl_col1:
-        st.caption(f"📁 Active Thread: **{current_session.get('title', 'Executive Briefing')}** ({len(current_session.get('messages', []))} messages)")
+        st.caption(f"📁 Thread: **{current_session.get('title', 'Executive Briefing')}** ({len(current_session.get('messages', []))} messages)")
     with ctrl_col2:
-        if st.button("➕ New Thread", key="btn_new_thread", use_container_width=True):
+        if st.button("➕ New", key="dlg_btn_new_thread", use_container_width=True):
             new_id = chatbot.create_new_session("New Agricultural Briefing")
             st.session_state["active_session_id"] = new_id
             st.rerun()
     with ctrl_col3:
-        # Export Active Thread to Markdown
         md_transcript = chatbot.export_session_markdown(current_session)
         st.download_button(
-            "📥 Export (.md)",
+            "📥 Export",
             data=md_transcript,
             file_name=f"AgroSense_Briefing_{current_session['id']}.md",
             mime="text/markdown",
-            key="btn_export_md",
+            key="dlg_btn_export_md",
             use_container_width=True,
-            help="Download complete Q&A briefing transcript"
+            help="Download complete Q&A briefing transcript as Markdown"
         )
     with ctrl_col4:
-        if st.button("🗑️ Delete Thread", key="btn_del_curr_thread", use_container_width=True):
+        if st.button("🗑️ Delete", key="dlg_btn_del_curr_thread", use_container_width=True):
             chatbot.delete_session(st.session_state["active_session_id"])
             rem = chatbot.load_all_sessions()
             if rem:
@@ -1161,11 +1130,15 @@ def show_agrosense_ai():
             else:
                 st.session_state["active_session_id"] = chatbot.create_new_session("New Session")
             st.rerun()
+    with ctrl_col5:
+        if st.button("✕ Close", key="dlg_btn_close", use_container_width=True):
+            st.session_state["show_chat_dialog"] = False
+            st.rerun()
 
-    # --- ADVANCED EXPANDABLE: Chat History Archive (Read / Delete) ---
-    with st.expander("📜 **Conversation History Archive (Read, Resume or Delete Past Briefings)**", expanded=False):
+    # --- EXPANDABLE: Chat History Archive (Read, Resume, Delete) ---
+    with st.expander("📜 **Conversation History Archive (Read / Resume / Delete Past Briefings)**", expanded=False):
         if len(all_sessions) > 0:
-            hist_tabs = st.tabs([f"Thread {i+1}: {s.get('title', 'Session')[:30]}" for i, s in enumerate(all_sessions[:8])])
+            hist_tabs = st.tabs([f"Thread {i+1}: {s.get('title', 'Session')[:24]}" for i, s in enumerate(all_sessions[:6])])
             for idx, tab in enumerate(hist_tabs):
                 s_data = all_sessions[idx]
                 with tab:
@@ -1173,15 +1146,14 @@ def show_agrosense_ai():
                     with c1:
                         st.markdown(f"**Session Title:** {s_data.get('title')} | *Created on {s_data.get('created_at')}* | **{len(s_data.get('messages', []))} exchanges**")
                     with c2:
-                        if st.button(f"🔄 Resume", key=f"resume_{s_data['id']}", use_container_width=True):
+                        if st.button("🔄 Resume", key=f"dlg_resume_{s_data['id']}", use_container_width=True):
                             st.session_state["active_session_id"] = s_data["id"]
                             st.rerun()
                     with c3:
-                        if st.button(f"🗑️ Delete", key=f"del_{s_data['id']}", use_container_width=True):
+                        if st.button("🗑️ Delete", key=f"dlg_del_{s_data['id']}", use_container_width=True):
                             chatbot.delete_session(s_data["id"])
                             st.rerun()
 
-                    # Preview transcript
                     st.divider()
                     for m in s_data.get("messages", []):
                         role_icon = "🧑‍🌾 **You:**" if m["role"] == "user" else "🤖 **AgroSense AI:**"
@@ -1195,45 +1167,57 @@ def show_agrosense_ai():
 
     # --- CATEGORIZED QUICK PROMPT PILLS ---
     st.markdown("#### 💡 Executive Inquiries & Scenario Prompts")
-    qp_tab1, qp_tab2, qp_tab3 = st.tabs(["🌾 Yield & Agronomy", "💰 Commercial Profitability", "📈 Macro Trends & Policy"])
+    qp_tab1, qp_tab2, qp_tab3, qp_tab4 = st.tabs(["🌾 Yield & Agronomy", "💰 Profitability", "📈 Macro Trends", "🤖 ML Predictions"])
 
     pending_query = None
 
     with qp_tab1:
         y_c1, y_c2, y_c3 = st.columns(3)
         with y_c1:
-            if st.button("🌾 Which state has highest yield?", key="qp_y1", use_container_width=True):
+            if st.button("🌾 Highest yielding state?", key="dlg_qp_y1", use_container_width=True):
                 pending_query = "Which state has the highest agricultural yield and what crops drive it?"
         with y_c2:
-            if st.button("🌱 Compare yield by crop variety", key="qp_y2", use_container_width=True):
+            if st.button("🌱 Compare yield by crop variety", key="dlg_qp_y2", use_container_width=True):
                 pending_query = "Compare average crop yield across all 8 crop varieties in India."
         with y_c3:
-            if st.button("🪨 Which soil produces highest yield?", key="qp_y3", use_container_width=True):
+            if st.button("🪨 Optimal soil for wheat & rice?", key="dlg_qp_y3", use_container_width=True):
                 pending_query = "What is the average yield across different soil types and which is optimal?"
 
     with qp_tab2:
         p_c1, p_c2, p_c3 = st.columns(3)
         with p_c1:
-            if st.button("💰 Which crop is most profitable?", key="qp_p1", use_container_width=True):
+            if st.button("💰 Most profitable crop?", key="dlg_qp_p1", use_container_width=True):
                 pending_query = "What is the most profitable crop for farmers and what is its average net return?"
         with p_c2:
-            if st.button("🗺️ Compare profit by state", key="qp_p2", use_container_width=True):
+            if st.button("🗺️ Compare profit by state", key="dlg_qp_p2", use_container_width=True):
                 pending_query = "Which states generate the highest average farmer profit in INR?"
         with p_c3:
-            if st.button("🏷️ Market price benchmark ranking", key="qp_p3", use_container_width=True):
+            if st.button("🏷️ Market price benchmark ranking", key="dlg_qp_p3", use_container_width=True):
                 pending_query = "Rank all crops by benchmark market price per ton."
 
     with qp_tab3:
         t_c1, t_c2, t_c3 = st.columns(3)
         with t_c1:
-            if st.button("📈 10-year yield trend (2014–2024)", key="qp_t1", use_container_width=True):
+            if st.button("📈 10-year yield trajectory", key="dlg_qp_t1", use_container_width=True):
                 pending_query = "Show the 10-year historical national yield trajectory from 2014 to 2024."
         with t_c2:
-            if st.button("💧 Drip vs Canal irrigation efficiency", key="qp_t2", use_container_width=True):
+            if st.button("💧 Drip vs Canal efficiency", key="dlg_qp_t2", use_container_width=True):
                 pending_query = "Compare crop yield and farmer profit between Drip, Canal, and Sprinkler irrigation."
         with t_c3:
-            if st.button("🌦️ Kharif vs Rabi season returns", key="qp_t3", use_container_width=True):
+            if st.button("🌦️ Kharif vs Rabi season returns", key="dlg_qp_t3", use_container_width=True):
                 pending_query = "Compare average agricultural yield and farmer profit between Kharif, Rabi, and Zaid seasons."
+
+    with qp_tab4:
+        m_c1, m_c2, m_c3 = st.columns(3)
+        with m_c1:
+            if st.button("🤖 Explain Profitability ML Model", key="dlg_qp_m1", use_container_width=True):
+                pending_query = "Explain how machine learning predicts farmer profitability and what are the dominant features."
+        with m_c2:
+            if st.button("🌲 Random Forest Yield Dynamics", key="dlg_qp_m2", use_container_width=True):
+                pending_query = "How does Random Forest regression model crop yield from weather and farming conditions?"
+        with m_c3:
+            if st.button("📉 Input Cost vs Profit Sensitivity", key="dlg_qp_m3", use_container_width=True):
+                pending_query = "What is the sensitivity of net farmer profit to fertilizer and pesticide input costs?"
 
     st.markdown("---")
 
@@ -1243,7 +1227,7 @@ def show_agrosense_ai():
     if not messages:
         st.info(
             "👋 **AgroSense AI is standing by.** Select any inquiry prompt above, or type your custom agribusiness question below. "
-            "Responses are strictly grounded in the 7,920 dataset records (2014–2024) with executive briefs and interactive visualizations."
+            "Every response includes an **Executive Summary**, a **Quantitative Benchmark Table**, **Strategic Management Solutions**, and an **Interactive Plotly Graph**."
         )
     else:
         for msg in messages:
@@ -1263,8 +1247,8 @@ def show_agrosense_ai():
 
     # --- CHAT INPUT BAR ---
     user_input = st.chat_input(
-        "Ask AgroSense AI anything about Indian crops, yields, profits, states, soils, weather…",
-        key="command_center_chat_input"
+        "Ask AgroSense AI anything about Indian crops, yields, profits, states, soils, weather, ML models…",
+        key="dlg_chat_input"
     )
 
     query = pending_query or user_input
@@ -1277,9 +1261,9 @@ def show_agrosense_ai():
             content=query
         )
 
-        with st.spinner("⚡ AgroSense AI is indexing knowledge base and synthesizing executive briefing…"):
+        # 2. Thinking indicator
+        with st.spinner("🤖 AgroSense AI is thinking... Analyzing 7,920 records & synthesizing executive solution..."):
             try:
-                # Prepare conversation context for Groq
                 session_history = [
                     {"role": m["role"], "content": m["content"]}
                     for m in current_session.get("messages", [])
@@ -1304,110 +1288,108 @@ def show_agrosense_ai():
 
 
 # =====================================================
-# 19c. FLOATING BOTTOM-RIGHT AI COPILOT ON EVERY PAGE
+# 19c. FLOATING BOTTOM-RIGHT CHAT BUBBLE (ON EVERY PAGE)
 # =====================================================
 
-def render_floating_ai_copilot(df):
+def render_floating_chat_bubble():
     """
-    Renders an elegant floating action button at the bottom-right corner of EVERY section/page.
-    When clicked, it opens a streamlined popover assistant without navigating away.
+    Renders an elegant, small circular floating chat bubble in the bottom-right corner of EVERY page.
+    NOT a wide dropdown button. Clicking the bubble launches the complete AgroSense AI modal.
     """
-    # Floating Trigger CSS
+    # 1. Dedicated Floating Bubble CSS
     st.markdown("""
     <style>
-    /* Fixed Floating Popover in Bottom Right Corner */
-    div[data-testid="stPopover"] {
+    /* Fixed Floating Chat Bubble at Bottom Right */
+    .agro-bubble-fixed-container {
+        position: fixed;
+        bottom: 26px;
+        right: 28px;
+        z-index: 9999999;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    /* Style the trigger button specifically */
+    div:has(> .agro-bubble-fixed-container) + div[data-testid="stButton"] button,
+    div[data-testid="stButton"]:has(button#agro_floating_btn) button,
+    button[key="agro_floating_btn"],
+    div.stButton > button#agro_floating_btn {
         position: fixed !important;
         bottom: 26px !important;
-        right: 30px !important;
-        z-index: 999999 !important;
-    }
-    div[data-testid="stPopover"] > button {
-        background: linear-gradient(135deg, #17452D 0%, #246B42 60%, #00C853 100%) !important;
+        right: 28px !important;
+        z-index: 9999999 !important;
+        width: 60px !important;
+        height: 60px !important;
+        min-width: 60px !important;
+        max-width: 60px !important;
+        min-height: 60px !important;
+        max-height: 60px !important;
+        border-radius: 50% !important;
+        background: linear-gradient(135deg, #17452D 0%, #246B42 55%, #00C853 100%) !important;
         color: #FFFFFF !important;
-        border-radius: 50px !important;
-        padding: 13px 25px !important;
-        font-weight: 750 !important;
-        font-size: 15px !important;
-        letter-spacing: 0.3px !important;
-        border: 2px solid #69F0AE !important;
-        box-shadow: 0 10px 28px rgba(23,69,45,0.45) !important;
-        transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+        border: 2.5px solid #69F0AE !important;
+        box-shadow: 0 8px 25px rgba(23,69,45,0.45) !important;
+        font-size: 26px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
     }
-    div[data-testid="stPopover"] > button:hover {
-        transform: translateY(-4px) scale(1.04) !important;
-        box-shadow: 0 14px 34px rgba(0,200,83,0.55) !important;
+    div:has(> .agro-bubble-fixed-container) + div[data-testid="stButton"] button:hover,
+    button[key="agro_floating_btn"]:hover {
+        transform: scale(1.12) translateY(-4px) !important;
+        box-shadow: 0 14px 32px rgba(0,200,83,0.6) !important;
         border-color: #FFFFFF !important;
     }
-    /* Floating popover drawer body styling */
-    div[data-testid="stPopoverBody"] {
-        width: 480px !important;
-        max-height: 650px !important;
-        border-radius: 16px !important;
-        border: 1px solid #328451 !important;
-        box-shadow: 0 16px 40px rgba(0,0,0,0.22) !important;
-        padding: 18px 20px !important;
-        background: #FFFFFF !important;
-    }
     </style>
+    <div class="agro-bubble-fixed-container"></div>
     """, unsafe_allow_html=True)
 
-    with st.popover("💬 Ask AgroSense AI", help="Open floating agricultural copilot"):
-        st.markdown("""
-        <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #DCE7DD; padding-bottom:8px; margin-bottom:12px;">
-            <div style="font-weight:800; font-size:1.15rem; color:#17452D;">🤖 AgroSense Quick Copilot</div>
-            <span style="font-size:0.75rem; background:#E8F5E9; color:#2E7D32; padding:3px 8px; border-radius:10px; font-weight:700;">Zero Hallucination</span>
-        </div>
-        """, unsafe_allow_html=True)
+    # 2. Floating Button (Small Circular Bubble)
+    if st.button("💬", key="agro_floating_btn", help="Open AgroSense AI Copilot"):
+        st.session_state["show_chat_dialog"] = True
 
-        st.caption("Ask any question on crops, yield, profit, soils or irrigation. Grounded in 7,920 records.")
+    # 3. JavaScript Helper to ensure circular bubble positioning on all browsers
+    st.components.v1.html("""
+    <script>
+    const setupBubble = () => {
+        const btns = window.parent.document.querySelectorAll('button');
+        btns.forEach(b => {
+            if (b.innerText.trim() === '💬' || b.getAttribute('aria-label') === 'agro_floating_btn') {
+                b.style.position = 'fixed';
+                b.style.bottom = '26px';
+                b.style.right = '28px';
+                b.style.zIndex = '9999999';
+                b.style.width = '60px';
+                b.style.height = '60px';
+                b.style.minWidth = '60px';
+                b.style.minHeight = '60px';
+                b.style.borderRadius = '50%';
+                b.style.background = 'linear-gradient(135deg, #17452D 0%, #246B42 55%, #00C853 100%)';
+                b.style.color = '#FFFFFF';
+                b.style.border = '2.5px solid #69F0AE';
+                b.style.boxShadow = '0 8px 25px rgba(23,69,45,0.45)';
+                b.style.fontSize = '26px';
+                b.style.display = 'flex';
+                b.style.alignItems = 'center';
+                b.style.justifyContent = 'center';
+                b.style.cursor = 'pointer';
+                b.style.padding = '0';
+                b.style.margin = '0';
+            }
+        });
+    };
+    setTimeout(setupBubble, 150);
+    setTimeout(setupBubble, 600);
+    </script>
+    """, height=0, width=0)
 
-        # Quick chips inside floating drawer
-        f_col1, f_col2 = st.columns(2)
-        with f_col1:
-            q_chip1 = st.button("🌾 Top Yielding State", key="fab_q1", use_container_width=True)
-        with f_col2:
-            q_chip2 = st.button("💰 Best Crop for Profit", key="fab_q2", use_container_width=True)
-
-        # In-drawer history
-        if "floating_chat_history" not in st.session_state:
-            st.session_state["floating_chat_history"] = []
-
-        # Floating chat input
-        fab_input = st.text_input("Enter your agribusiness query:", key="fab_text_input", placeholder="e.g. Compare yield in Punjab vs Karnataka")
-
-        trigger_q = None
-        if q_chip1:
-            trigger_q = "Which state has the highest agricultural yield and what crop drives it?"
-        elif q_chip2:
-            trigger_q = "What is the most profitable crop and how much profit does it generate?"
-        elif fab_input:
-            trigger_q = fab_input
-
-        if trigger_q:
-            import chatbot
-            with st.spinner("Analyzing ground truth data..."):
-                try:
-                    ans, fig = chatbot.chat(trigger_q, [])
-                    st.session_state["floating_chat_history"].append({
-                        "q": trigger_q,
-                        "a": ans,
-                        "fig": fig
-                    })
-                except Exception as e:
-                    st.error(f"Error: {e}")
-
-        # Display latest responses inside floating card
-        if st.session_state["floating_chat_history"]:
-            latest = st.session_state["floating_chat_history"][-1]
-            st.markdown(f"**Q: {latest['q']}**")
-            st.markdown(latest["a"])
-            if latest.get("fig") is not None:
-                st.plotly_chart(latest["fig"], use_container_width=True)
-
-            if st.button("🗑️ Clear Floating Chat", key="fab_clear_btn", use_container_width=True):
-                st.session_state["floating_chat_history"] = []
-                st.rerun()
+    # 4. Open Dialog if active
+    if st.session_state.get("show_chat_dialog", False):
+        open_agrosense_ai_dialog()
 
 
 
@@ -1962,8 +1944,6 @@ elif page == "Farmer Profitability Prediction":
 
 
 
-elif page == "🤖 AgroSense AI":
-    show_agrosense_ai()
 # =====================================================
 # 20. FOOTER
 # =====================================================
@@ -1972,7 +1952,6 @@ st.divider()
 st.markdown("🌾 **AgriSmart | Smart Agriculture Dashboard**")
 st.caption("Crop Yield Forecasting and Farmer Profitability Prediction")
 
-# --- Floating Bottom-Right Copilot (Available on every page) ---
-if page != "🤖 AgroSense AI":
-    render_floating_ai_copilot(df)
+# --- Floating Bottom-Right Chat Bubble (Available on EVERY Page) ---
+render_floating_chat_bubble()
 

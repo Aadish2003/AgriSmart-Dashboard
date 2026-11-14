@@ -13,8 +13,9 @@ env/
 venv/
 ENV/
 
-# Local Chat Session Store
+# Local Chat Session Store & Temporary Scratch
 chat_history_store.json
+scratch/
 
 # IDE settings
 .vscode/

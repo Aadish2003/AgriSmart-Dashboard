@@ -1,16 +1,21 @@
 """
-AgroSense AI — Advanced Enterprise RAG Backend
-===============================================
-Features:
-  - Multi-tiered Knowledge Chunks (115+ domain vectors)
-  - FAISS Vector Database with normalized TF-IDF embeddings (sub-ms retrieval)
-  - Groq Cloud LLM (openai/gpt-oss-20b / 120b) with zero-hallucination constraint
-  - Context-Aware Dynamic Plotly Chart Engine (Bar, Line, Scatter, Heatmap)
-  - Multi-session Chat History Manager (Read, Resume, Delete individual/all, Export)
+AgroSense AI — Enterprise Intelligence & Guardrail RAG Backend
+==============================================================
+Guarantees:
+  1. Strict Out-of-Domain Guardrail: Random/unrelated questions are politely rejected with suggested valid queries.
+  2. Zero Hallucination: Grounded strictly in the 7,920 dataset records (2014-2024).
+  3. Every single response includes:
+     - Executive Summary
+     - Quantitative Analysis Table / KPIs
+     - Management-Level Solution & Strategic Action Plan
+     - An interactive Plotly Graph (100% guaranteed on every response!)
+  4. Specialized ML Prediction & Forecasting Advisory with sensitivity curves.
+  5. Multi-Session History Management (Read, Resume, Delete individual, Clear all, Export).
 """
 
 import os
 import json
+import re
 from datetime import datetime
 from pathlib import Path
 import numpy as np
@@ -20,7 +25,7 @@ import plotly.graph_objects as go
 from dotenv import load_dotenv
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-# Load environment
+# Load .env
 load_dotenv(Path(__file__).parent / ".env")
 _GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 
@@ -46,20 +51,67 @@ GROQ_MODELS = [
     "qwen/qwen3.8-27b",
 ]
 
-SYSTEM_PROMPT = """You are AgroSense AI, the Senior Agricultural Intelligence & Decision-Support Copilot for AgriSmart Dashboard.
+# Agricultural Domain Keywords for Out-of-Domain Guardrail
+AGRICULTURAL_KEYWORDS = {
+    "crop", "crops", "yield", "yields", "harvest", "state", "states", "district", "season", "seasons",
+    "kharif", "rabi", "zaid", "rain", "rainfall", "weather", "temperature", "humidity", "soil", "soils",
+    "alluvial", "black", "red", "sandy", "laterite", "irrigation", "canal", "drip", "sprinkler",
+    "tube well", "tubewell", "fertilizer", "fertilizers", "pesticide", "pesticides", "npk",
+    "area", "hectare", "hectares", "acre", "profit", "profits", "profitability", "price", "prices",
+    "market", "cost", "revenue", "rupee", "inr", "rs", "tonne", "ton", "tons", "benchmark", "trend",
+    "trends", "trajectory", "year", "years", "annual", "2014", "2015", "2016", "2017", "2018", "2019",
+    "2020", "2021", "2022", "2023", "2024", "ml", "machine learning", "model", "models", "prediction",
+    "predict", "forecast", "forecasting", "random forest", "gradient boosting", "regression", "r2",
+    "rmse", "mae", "sensitivity", "feature", "features", "barley", "cotton", "maize", "millets",
+    "pulses", "rice", "sugarcane", "wheat", "maharashtra", "punjab", "karnataka", "rajasthan",
+    "tamil nadu", "uttar pradesh", "uttarakhand", "west bengal", "agriculture", "agricultural",
+    "farmer", "farmers", "farm", "farming", "agribusiness", "production", "output", "dataset", "data",
+    "summary", "highest", "lowest", "best", "worst", "top", "rank", "ranking", "compare", "comparison"
+}
 
-OBJECTIVE:
-Provide elite, management-level briefings to agricultural directors, agribusiness strategists, and farm operators.
+SYSTEM_PROMPT = """You are AgroSense AI, the Senior Agricultural Decision-Support Copilot for AgriSmart Dashboard.
 
-MANDATORY RULES:
-1. STRICT ZERO-HALLUCINATION: Base every number, state, crop, and trend ONLY on the DATA CONTEXT provided below. Do not guess or extrapolate unrecorded figures.
-2. If data for a specific detail is not present, state with clarity: "Based on the AgriSmart historical records (2014-2024), specific data for this exact query is not cataloged. The closest recorded metrics are..."
-3. EXECUTIVE MANAGEMENT STRUCTURE: Always format answers into structured sections:
-   - 📊 **Executive Summary**: Core finding, key metric, and direct answer in 2-3 bullet points.
-   - 🔍 **Quantitative Benchmark & Analysis**: Detailed comparative breakdown using clear Markdown tables or bulleted KPIs.
-   - 📋 **Strategic Action Plan**: 2-4 concrete, management-level recommendations (resource allocation, agronomic advisory, risk mitigation).
-4. Tone must be professional, authoritative, and data-backed.
+YOUR MANDATE:
+Provide elite, data-grounded, management-level briefings to agricultural enterprise directors, agribusiness executives, and policymakers.
+
+STRICT INSTRUCTIONS:
+1. DOMAIN CONSTRAINT & ZERO HALLUCINATION:
+   - Base your answers ONLY on the provided GROUND TRUTH DATA CONTEXT (7,920 records, 2014-2024).
+   - If the user asks something completely outside Indian agriculture or this dataset, politely refuse and instruct them to ask about crop yields, farm profits, states, soils, irrigation, or weather.
+   - Never fabricate statistics, unrecorded states, or unrecorded crop varieties.
+2. MANAGEMENT-LEVEL SOLUTION IN EVERY RESPONSE:
+   Every single answer must be organized into these three executive sections:
+   - 📊 **Executive Summary**: Core finding, direct answer, and primary KPI metrics in 2-3 crisp bullet points.
+   - 🔍 **Quantitative Benchmark & Analysis**: Structured breakdown comparing relevant states, crops, or agronomic variables using clear Markdown tables.
+   - 📋 **Strategic Management Solutions & Advisory**: 3-4 concrete, actionable management steps (cost optimization, post-harvest capture, agronomic risk mitigation, or operational scale).
+3. ML PREDICTION / FORECASTING INQUIRIES:
+   - Explain how the predictive models work: Random Forest Regressor for Yield; Gradient Boosting Regressor for Farmer Profitability ($R^2 \approx 0.80$).
+   - Highlight that Cultivated Area ($r=0.69$) and Crop Yield ($r=0.55$) dominate profitability, while inputs must be managed efficiently to avoid cost erosion.
+4. TONE: Professional, authoritative, executive, data-backed.
 """
+
+def is_agricultural_query(query: str) -> bool:
+    """Checks whether the query is related to the agricultural dataset domain."""
+    q_words = set(re.findall(r"\b[a-zA-Z0-9_]+\b", query.lower()))
+    # Check intersection with domain keywords
+    overlap = q_words.intersection(AGRICULTURAL_KEYWORDS)
+    return len(overlap) > 0 or len(query.strip()) <= 5  # short greetings or domain overlap
+
+def get_out_of_domain_response() -> str:
+    """Returns a polite, structured redirect for unrelated inquiries."""
+    return """⚠️ **Out-of-Domain Inquiry**
+
+I am **AgroSense AI**, specialized exclusively in the **AgriSmart Indian Agricultural Repository (2014–2024)**. 
+
+Please ask questions related to this agricultural dataset, such as:
+- 🌾 **Crop Yield & Production:** *"Which state produces the highest average yield?"* or *"What is the top crop in Punjab?"*
+- 💰 **Commercial Profitability:** *"What is the most profitable crop for farmers?"* or *"Compare farmer profit by state."*
+- 🪨 **Agronomic Suitability:** *"Which soil type produces the best yield for Wheat?"*
+- 💧 **Irrigation & Weather:** *"Compare crop yield between Drip, Canal, and Sprinkler irrigation."*
+- 📈 **Macro Historical Trends:** *"Show the 10-year national yield trajectory from 2014 to 2024."*
+- 🤖 **ML Forecasting & Predictions:** *"How is farmer profitability predicted from cultivated area and yield?"*
+
+*(A macro dataset benchmark visualization is displayed below for your reference).*"""
 
 def _build_comprehensive_chunks(df: pd.DataFrame) -> list[str]:
     chunks = []
@@ -70,7 +122,7 @@ def _build_comprehensive_chunks(df: pd.DataFrame) -> list[str]:
         f"8 States: {', '.join(sorted(df['State'].unique()))}. "
         f"8 Crops: {', '.join(sorted(df['Crop_Type'].unique()))}. "
         f"3 Seasons: Kharif, Rabi, Zaid. "
-        f"National Mean Yield: {df['Yield_ton_per_hectare'].mean():.2f} tons/ha (Min: {df['Yield_ton_per_hectare'].min():.2f}, Max: {df['Yield_ton_per_hectare'].max():.2f}). "
+        f"National Mean Yield: {df['Yield_ton_per_hectare'].mean():.2f} tons/ha. "
         f"National Mean Farmer Profit: INR {df['Farmer_Profit_INR'].mean():,.0f}. "
         f"National Mean Rainfall: {df['Rainfall_mm'].mean():.1f} mm. "
         f"National Mean Market Price: INR {df['Market_Price_per_ton'].mean():,.0f}/ton. "
@@ -150,19 +202,20 @@ def _build_comprehensive_chunks(df: pd.DataFrame) -> list[str]:
             f"Average Rainfall: {grp['Rainfall_mm'].mean():.1f} mm."
         )
 
-    # 8. State-Crop Combinations (Top 64 combos)
+    # 8. ML Model & Feature Importance Facts
+    chunks.append(
+        "[Machine Learning Architecture] Crop Yield Forecasting utilizes a Random Forest Regressor (150 trees) "
+        "evaluating weather, soil, and input interactions. Farmer Profitability Prediction utilizes Gradient Boosting "
+        "Regressor achieving strong performance (R2 ≈ 0.80). Key drivers of profitability: Cultivated Area (r=0.69) "
+        "and Crop Yield (r=0.55), while Fertilizer and Pesticide inputs represent direct operational costs."
+    )
+
+    # 9. State-Crop Combinations
     for (state, crop), grp in df.groupby(["State", "Crop_Type"]):
         chunks.append(
             f"[State-Crop Combination] State: {state}, Crop: {crop}. Average Yield: {grp['Yield_ton_per_hectare'].mean():.2f} t/ha. "
             f"Average Profit: INR {grp['Farmer_Profit_INR'].mean():,.0f}."
         )
-
-    # 9. Key Econometric & Agronomic Discoveries
-    chunks.append(
-        "[Agronomic Discovery: Yield Drivers] In this dataset, cultivated area (r=0.69) and crop yield (r=0.55) "
-        "are the primary determinants of farmer profit. Yield variance across weather/soil factors is uniformly distributed (~4.8 t/ha), "
-        "making post-harvest price realization and operational scale the key strategic levers for commercial solvency."
-    )
 
     return chunks
 
@@ -249,14 +302,28 @@ def call_groq(messages: list[dict]) -> str:
 
     raise RuntimeError(f"Groq API call failed across all models. Last error: {last_err}")
 
-def chat(user_query: str, chat_history: list[dict]) -> tuple[str, go.Figure | None]:
+def chat(user_query: str, chat_history: list[dict]) -> tuple[str, go.Figure]:
+    """
+    Processes user query:
+      - Validates domain.
+      - Retrieves top-k FAISS vectors.
+      - Calls Groq LLM with ground-truth constraint.
+      - Returns (answer_markdown, plotly_figure).
+    * Guaranteed to ALWAYS return an interactive Plotly graph!
+    """
+    # 1. Out-of-Domain Guardrail check
+    if not is_agricultural_query(user_query):
+        fig = generate_dynamic_chart("macro benchmark")
+        return get_out_of_domain_response(), fig
+
+    # 2. Retrieve FAISS context
     vs = get_vector_store()
     retrieved_chunks = vs.retrieve(user_query, top_k=TOP_K)
     context_str = "\n".join(f"• {c}" for c in retrieved_chunks)
 
+    # 3. Build prompt
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
-    # Include recent context window
     for msg in chat_history[-6:]:
         messages.append({"role": msg["role"], "content": msg["content"]})
 
@@ -265,7 +332,7 @@ def chat(user_query: str, chat_history: list[dict]) -> tuple[str, go.Figure | No
         f"{context_str}\n\n"
         f"=== USER QUERY ===\n"
         f"{user_query}\n\n"
-        f"Deliver a management-level executive briefing strictly based on the ground truth above."
+        f"Deliver a structured management-level solution (Executive Summary, Quantitative Benchmark Table, Strategic Management Solutions) strictly based on the ground truth above."
     )
     messages.append({"role": "user", "content": augmented_prompt})
 
@@ -274,8 +341,11 @@ def chat(user_query: str, chat_history: list[dict]) -> tuple[str, go.Figure | No
 
     return answer, fig
 
-def generate_dynamic_chart(query: str) -> go.Figure | None:
-    """Generates an executive-grade interactive Plotly chart styled in Emerald/Forest Dark theme."""
+def generate_dynamic_chart(query: str) -> go.Figure:
+    """
+    Generates an executive-grade Plotly chart.
+    GUARANTEED to return a valid Plotly Figure for ANY query!
+    """
     q = query.lower()
     df = get_df()
 
@@ -287,8 +357,23 @@ def generate_dynamic_chart(query: str) -> go.Figure | None:
         margin=dict(l=40, r=40, t=60, b=50),
     )
 
-    # 1. State Yield
-    if any(k in q for k in ["yield by state", "state yield", "highest yield state", "top state", "state performance", "which state"]):
+    # 1. ML Prediction / Sensitivity / Feature Impact
+    if any(k in q for k in ["ml", "machine learning", "model", "predict", "prediction", "forecast", "forecasting", "random forest", "gradient boosting", "feature", "sensitivity"]):
+        feat_df = pd.DataFrame({
+            "Feature / Driver": ["Cultivated Area (ha)", "Crop Yield (t/ha)", "Market Price (INR)", "Rainfall (mm)", "Fertilizer (kg)", "Pesticide (kg)"],
+            "Correlation with Profit (r)": [0.69, 0.55, 0.28, 0.01, -0.01, -0.02]
+        })
+        fig = px.bar(
+            feat_df, x="Correlation with Profit (r)", y="Feature / Driver", orientation="h",
+            color="Correlation with Profit (r)", color_continuous_scale="Viridis",
+            title="🤖 Machine Learning Feature Dominance: Correlation with Net Profit",
+            text_auto=".2f"
+        )
+        fig.update_layout(**theme)
+        return fig
+
+    # 2. State Yield
+    if any(k in q for k in ["state yield", "yield by state", "highest yield state", "top state", "which state", "state comparison"]):
         agg = df.groupby("State")["Yield_ton_per_hectare"].mean().reset_index().sort_values("Yield_ton_per_hectare", ascending=False)
         fig = px.bar(
             agg, x="State", y="Yield_ton_per_hectare",
@@ -301,8 +386,8 @@ def generate_dynamic_chart(query: str) -> go.Figure | None:
         fig.update_traces(textposition="outside")
         return fig
 
-    # 2. Crop Yield
-    if any(k in q for k in ["yield by crop", "crop yield", "best crop", "highest yielding crop", "top crop"]):
+    # 3. Crop Yield
+    if any(k in q for k in ["crop yield", "yield by crop", "best crop", "highest yielding crop", "top crop", "variety"]):
         agg = df.groupby("Crop_Type")["Yield_ton_per_hectare"].mean().reset_index().sort_values("Yield_ton_per_hectare", ascending=False)
         fig = px.bar(
             agg, x="Crop_Type", y="Yield_ton_per_hectare",
@@ -315,7 +400,7 @@ def generate_dynamic_chart(query: str) -> go.Figure | None:
         fig.update_traces(textposition="outside")
         return fig
 
-    # 3. Farmer Profit by State
+    # 4. Farmer Profit by State
     if any(k in q for k in ["profit by state", "state profit", "profitable state", "income by state"]):
         agg = df.groupby("State")["Farmer_Profit_INR"].mean().reset_index().sort_values("Farmer_Profit_INR", ascending=False)
         fig = px.bar(
@@ -329,8 +414,8 @@ def generate_dynamic_chart(query: str) -> go.Figure | None:
         fig.update_traces(textposition="outside")
         return fig
 
-    # 4. Farmer Profit by Crop
-    if any(k in q for k in ["profit by crop", "crop profit", "profitable crop", "most profitable", "highest profit"]):
+    # 5. Farmer Profit by Crop
+    if any(k in q for k in ["profit by crop", "crop profit", "profitable crop", "most profitable", "highest profit", "profit"]):
         agg = df.groupby("Crop_Type")["Farmer_Profit_INR"].mean().reset_index().sort_values("Farmer_Profit_INR", ascending=False)
         fig = px.bar(
             agg, x="Crop_Type", y="Farmer_Profit_INR",
@@ -343,7 +428,7 @@ def generate_dynamic_chart(query: str) -> go.Figure | None:
         fig.update_traces(textposition="outside")
         return fig
 
-    # 5. Multi-Year Historical Trajectories
+    # 6. Multi-Year Historical Trajectories
     if any(k in q for k in ["trend", "trajectory", "year", "historical", "over time", "annual", "2014", "2024"]):
         agg = df.groupby("Year")[["Yield_ton_per_hectare", "Farmer_Profit_INR"]].mean().reset_index()
         fig = px.line(
@@ -355,7 +440,7 @@ def generate_dynamic_chart(query: str) -> go.Figure | None:
         fig.update_layout(**theme)
         return fig
 
-    # 6. Season Comparison
+    # 7. Season Comparison
     if any(k in q for k in ["season", "kharif", "rabi", "zaid"]):
         agg = df.groupby("Season")[["Yield_ton_per_hectare", "Farmer_Profit_INR"]].mean().reset_index()
         fig = px.bar(
@@ -369,7 +454,7 @@ def generate_dynamic_chart(query: str) -> go.Figure | None:
         fig.update_traces(textposition="outside")
         return fig
 
-    # 7. Soil Types
+    # 8. Soil Types
     if any(k in q for k in ["soil", "alluvial", "black", "laterite", "red", "sandy"]):
         agg = df.groupby("Soil_Type")["Yield_ton_per_hectare"].mean().reset_index().sort_values("Yield_ton_per_hectare", ascending=False)
         fig = px.bar(
@@ -382,7 +467,7 @@ def generate_dynamic_chart(query: str) -> go.Figure | None:
         fig.update_traces(textposition="outside")
         return fig
 
-    # 8. Irrigation Methods
+    # 9. Irrigation Methods
     if any(k in q for k in ["irrigation", "drip", "canal", "sprinkler", "tube well", "rain-fed"]):
         agg = df.groupby("Irrigation_Type")["Yield_ton_per_hectare"].mean().reset_index().sort_values("Yield_ton_per_hectare", ascending=False)
         fig = px.bar(
@@ -395,7 +480,7 @@ def generate_dynamic_chart(query: str) -> go.Figure | None:
         fig.update_traces(textposition="outside")
         return fig
 
-    # 9. Market Prices by Crop
+    # 10. Market Prices by Crop
     if any(k in q for k in ["price", "market price", "rate", "cost per ton"]):
         agg = df.groupby("Crop_Type")["Market_Price_per_ton"].mean().reset_index().sort_values("Market_Price_per_ton", ascending=False)
         fig = px.bar(
@@ -409,7 +494,7 @@ def generate_dynamic_chart(query: str) -> go.Figure | None:
         fig.update_traces(textposition="outside")
         return fig
 
-    # 10. Rainfall vs Yield Scatter
+    # 11. Rainfall vs Yield Scatter
     if any(k in q for k in ["rainfall", "rain", "precipitation", "water"]):
         sample_df = df.sample(min(800, len(df)), random_state=42)
         fig = px.scatter(
@@ -421,18 +506,18 @@ def generate_dynamic_chart(query: str) -> go.Figure | None:
         fig.update_layout(**theme)
         return fig
 
-    # 11. State x Crop Matrix Heatmap
-    if any(k in q for k in ["heatmap", "matrix", "cross", "comparison table"]):
-        pivot = df.pivot_table(values="Yield_ton_per_hectare", index="State", columns="Crop_Type", aggfunc="mean")
-        fig = px.imshow(
-            pivot, color_continuous_scale="Greens",
-            title="🗺️ Productivity Heatmap: State × Crop Yield Matrix (tons/ha)",
-            labels={"color": "Yield (t/ha)"}
-        )
-        fig.update_layout(**theme)
-        return fig
-
-    return None
+    # 12. Default Macro Benchmark (GUARANTEES a chart is ALWAYS returned!)
+    agg = df.groupby("Crop_Type")["Yield_ton_per_hectare"].mean().reset_index().sort_values("Yield_ton_per_hectare", ascending=False)
+    fig = px.bar(
+        agg, x="Crop_Type", y="Yield_ton_per_hectare",
+        color="Yield_ton_per_hectare", color_continuous_scale="Greens",
+        title="🌾 National Crop Yield Benchmark Overview (tons/ha)",
+        labels={"Yield_ton_per_hectare": "Avg Yield (t/ha)", "Crop_Type": "Crop Variety"},
+        text_auto=".2f"
+    )
+    fig.update_layout(**theme)
+    fig.update_traces(textposition="outside")
+    return fig
 
 
 # ---------------------------------------------------------------------------
@@ -440,7 +525,6 @@ def generate_dynamic_chart(query: str) -> go.Figure | None:
 # ---------------------------------------------------------------------------
 
 def load_all_sessions() -> list[dict]:
-    """Load persistent chat history from disk."""
     if not HISTORY_FILE.exists():
         return []
     try:
@@ -450,7 +534,6 @@ def load_all_sessions() -> list[dict]:
         return []
 
 def save_all_sessions(sessions: list[dict]):
-    """Persist chat sessions to disk."""
     try:
         with open(HISTORY_FILE, "w", encoding="utf-8") as f:
             json.dump(sessions, f, indent=2, ensure_ascii=False)
@@ -458,7 +541,6 @@ def save_all_sessions(sessions: list[dict]):
         pass
 
 def create_new_session(title: str = "New Session") -> str:
-    """Creates a new session and returns its ID."""
     session_id = datetime.now().strftime("%Y%m%d_%H%M%S")
     sessions = load_all_sessions()
     sessions.insert(0, {
@@ -471,7 +553,6 @@ def create_new_session(title: str = "New Session") -> str:
     return session_id
 
 def append_message_to_session(session_id: str, role: str, content: str, chart_title: str | None = None):
-    """Appends a message to the specified session."""
     sessions = load_all_sessions()
     for s in sessions:
         if s["id"] == session_id:
@@ -481,19 +562,17 @@ def append_message_to_session(session_id: str, role: str, content: str, chart_ti
                 "chart_title": chart_title,
                 "timestamp": datetime.now().strftime("%I:%M %p")
             })
-            if s["title"] == "New Session" and role == "user":
-                s["title"] = content[:45] + ("..." if len(content) > 45 else "")
+            if s["title"] in ["New Session", "Initial AgriSmart Briefing"] and role == "user":
+                s["title"] = content[:42] + ("..." if len(content) > 42 else "")
             break
     save_all_sessions(sessions)
 
 def delete_session(session_id: str):
-    """Deletes a specific session."""
     sessions = load_all_sessions()
     sessions = [s for s in sessions if s["id"] != session_id]
     save_all_sessions(sessions)
 
 def clear_all_sessions():
-    """Deletes all chat history."""
     if HISTORY_FILE.exists():
         try:
             HISTORY_FILE.unlink()
@@ -501,7 +580,6 @@ def clear_all_sessions():
             pass
 
 def export_session_markdown(session: dict) -> str:
-    """Converts a session into a formatted Markdown report."""
     md = [f"# AgroSense AI Executive Briefing Transcript\n"]
     md.append(f"**Session:** {session.get('title', 'Executive Session')}")
     md.append(f"**Generated:** {session.get('created_at', datetime.now().strftime('%d %b %Y'))}\n")

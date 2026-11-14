@@ -13,12 +13,12 @@
 
 ## 📖 Executive Summary & Project Background
 
-**AgriSmart** is an enterprise agricultural data intelligence system designed for agribusiness analysts, farm enterprise managers, and policymakers in India. The platform integrates historical agricultural records covering 10 years (2014–2024), exploratory data analysis (EDA), multi-model machine learning benchmarking, an interactive **Streamlit** dashboard, and **AgroSense AI** — an executive conversational intelligence assistant powered by Retrieval-Augmented Generation (RAG).
+**AgriSmart** is an enterprise agricultural data intelligence system designed for agribusiness analysts, farm enterprise managers, and policymakers in India. The platform integrates historical agricultural records covering 10 years (2014–2024), exploratory data analysis (EDA), multi-model machine learning benchmarking, an interactive **Streamlit** dashboard, and **AgroSense AI** — a decision-support conversational intelligence assistant powered by Retrieval-Augmented Generation (RAG).
 
-The application addresses three strategic pillars:
+The application addresses three core analytical workflows:
 1. **How much crop can a farmer expect to harvest?** (Crop Yield Forecasting in tons/hectare)
 2. **What will be the net monetary return for the farm enterprise?** (Farmer Profitability Prediction in INR)
-3. **What strategic decisions should farm management make?** (AgroSense AI: Executive RAG Copilot with interactive charts & floating assistant on every page)
+3. **What strategic decisions should farm management make?** (AgroSense AI: Omnipresent floating circular copilot bubble with interactive Plotly visualizer & out-of-domain guardrails)
 
 ---
 
@@ -63,7 +63,7 @@ We implemented and systematically evaluated **9 regression algorithms**:
 
 ---
 
-## 🤖 AgroSense AI — Advanced UI/UX & Enterprise Features
+## 🤖 AgroSense AI — Omnipresent Copilot Bubble & Enterprise Features
 
 ```
                           ┌─────────────────────────────────────┐
@@ -82,15 +82,15 @@ We implemented and systematically evaluated **9 regression algorithms**:
                           └──────────────────┬──────────────────┘
                                              │ Top-K Retrieval
                                              ▼
-User Query ──► Query Vectorizer ──► Context-Augmented Prompt
-                                             │
-                                             ▼
-                          ┌─────────────────────────────────────┐
-                          │       Groq Cloud LLM Inference      │
-                          │   (openai/gpt-oss-20b / 120b)       │
-                          └──────────────────┬──────────────────┘
-                                             │ Zero-Hallucination Output
-                                             ▼
+User Query ──► Domain Guardrail ──► Query Vectorizer ──► Context-Augmented Prompt
+                                                            │
+                                                            ▼
+                                         ┌─────────────────────────────────────┐
+                                         │       Groq Cloud LLM Inference      │
+                                         │   (openai/gpt-oss-20b / 120b)       │
+                                         └──────────────────┬──────────────────┘
+                                                            │ Zero-Hallucination Output
+                                                            ▼
                ┌─────────────────────────────────────────────────────┐
                │              AgroSense AI Executive Brief           │
                │  • 📊 Executive Summary (Direct Answer & KPIs)      │
@@ -100,31 +100,25 @@ User Query ──► Query Vectorizer ──► Context-Augmented Prompt
                └─────────────────────────────────────────────────────┘
 ```
 
-### ✨ Advanced UI/UX Innovations:
-1. **Floating Action Button (FAB) on Every Page**:
-   - A floating, stylish green launcher button (`💬 Ask AgroSense AI`) is pinned to the bottom-right corner of **every single section/page**.
-   - Clicking it opens an instant in-place Copilot drawer where users can ask any question, view ground-truth answers, and examine interactive charts without leaving their current workflow.
-2. **Comprehensive Chat History Manager (Read, Resume & Delete)**:
-   - **Read Past Briefings**: Inspect full multi-turn conversation transcripts from past sessions.
-   - **Resume Session**: Switch to any past thread to continue an ongoing analytical investigation.
-   - **Delete Specific Session**: 🗑️ Individual thread deletion to keep the workspace organized.
-   - **Clear All History**: One-click reset for session management.
+### ✨ Advanced Architecture & UI/UX Design:
+1. **Floating Circular Chat Bubble (NOT a Dropdown Bar)**:
+   - Replaced all cumbersome dropdown bars with an elegant, small circular floating chat bubble (`💬`) fixed in the bottom-right corner of **every single page**.
+   - Clicking the bubble triggers the full enterprise modal dialog (`@st.dialog`) without disturbing dashboard layouts.
+2. **Clean 6-Page Navigation**:
+   - The left sidebar Navigation radio focuses strictly on the 6 core analytical dashboards (Dashboard Overview, Crop Analysis, Data Explorer, Profitability Model Evaluation, Crop Yield Forecasting, and Farmer Profitability Prediction).
+3. **Out-of-Domain Guardrail (Zero Hallucination)**:
+   - If an off-topic or random question is asked (e.g., sports, coding, general trivia), AgroSense AI politely declines and provides suggested agricultural queries, alongside a macro dataset benchmark chart.
+4. **Guaranteed Interactive Plotly Graph on EVERY Response**:
+   - Every response dynamically includes an executive-grade Plotly chart (state yield rankings, crop profitability spreads, 10-year trajectories, irrigation efficiency, price benchmarks, or ML feature importance).
+5. **Animated Thinking Status Indicator**:
+   - Displays real-time operational feedback (`🤖 AgroSense AI is thinking... Analyzing 7,920 records & synthesizing executive solution...`) during processing.
+6. **Multi-Session Chat History Archive (Read, Resume, Delete & Export)**:
+   - **Read Past Briefings**: Inspect past session transcripts with message counts and creation timestamps.
+   - **Resume Past Thread**: Load any previous investigation into the active chat window.
+   - **Individual Deletion**: 🗑️ Delete specific threads.
    - **Export as Markdown (.md)**: 📥 Instant download of formatted executive briefing reports.
-3. **Glassmorphism Status Strip**:
-   - Real-time indicator badges displaying live system health:
-     - 🟢 *Groq Cloud LPU Accelerated*
-     - 🟢 *FAISS Vector Index (115 Domain Nodes)*
-     - 🟢 *7,920 Verified Records (2014–2024)*
-     - 🛡️ *Ground-Truth Constrained (Zero Hallucination)*
-4. **Categorized Scenario Prompt Pills**:
-   - One-click inquiry tabs for:
-     - 🌾 **Yield & Agronomy**: State benchmarks, crop rankings, soil performance.
-     - 💰 **Commercial Profitability**: Margin leaders, state profit spreads, market price benchmarks.
-     - 📈 **Macro Trends & Policy**: 10-year trajectories, irrigation efficiency, seasonal comparisons.
-5. **Zero Hallucination Guarantee**:
-   - Strictly enforced ground truth. If data is not present, AgroSense AI provides recorded proximate figures rather than fabricating unverified claims.
-6. **Backend-Only Credential Protection**:
-   - The Groq API key is managed strictly through `.env` on the server backend and is never rendered in HTML or visible to the user.
+7. **ML Prediction & Forecasting Advisory**:
+   - Deep explanations of Random Forest and Gradient Boosting dynamics ($R^2 \approx 0.80$), input cost sensitivities, and feature dominance (Area $r=0.69$, Yield $r=0.55$).
 
 ---
 
@@ -133,8 +127,8 @@ User Query ──► Query Vectorizer ──► Context-Augmented Prompt
 ```
 AgriSmart-Dashboard/
 │
-├── app.py                                   # Complete Streamlit Dashboard (7 Pages, 1,980+ lines)
-├── chatbot.py                               # AgroSense AI RAG backend & Session Manager
+├── app.py                                   # Complete Streamlit Dashboard (6 Pages + Floating Copilot Bubble)
+├── chatbot.py                               # AgroSense AI RAG engine, dynamic chart generator & Session Manager
 ├── india_rainfall_crop_yield_2014_2024 (1).csv # Historical agricultural dataset (7,920 records)
 ├── rain.ipynb                               # Full analysis & ML model development notebook
 ├── crop_yield_model.pkl                     # Serialized Random Forest yield model
@@ -188,22 +182,12 @@ Open your browser at `http://localhost:8501`.
 
 | Page | Description | Key Features |
 |---|---|---|
-| **Dashboard Overview** | Executive summary of national agricultural metrics. | KPI metric cards, regional yield breakdowns, crop distribution charts, **Floating AI Copilot**. |
-| **Crop Analysis** | Comparative analysis across 8 major crop varieties. | Yield vs. input correlations, price-yield scatter plots, soil suitability charts, **Floating AI Copilot**. |
-| **Data Explorer** | Interactive dataset browser with multi-dimensional filtering. | State/Crop/Season filters, summary statistics, filtered CSV export, **Floating AI Copilot**. |
-| **Profitability Model Evaluation** | Rigorous evaluation of 9 ML algorithms for farm profit. | Holdout metrics ($R^2$, MAE, RMSE), TimeSeries CV, residual distribution plots, **Floating AI Copilot**. |
-| **Crop Yield Forecasting** | ML-driven expected yield prediction engine. | Farm parameter input form, Random Forest inference, sensitivity curves, regional benchmark charts, **Floating AI Copilot**. |
-| **Farmer Profitability Prediction** | End-to-end farm enterprise profitability forecasting. | Scale & input cost analysis, sensitivity curves ($\pm 20\%$), revenue/cost structure breakdown, **Floating AI Copilot**. |
-| **🤖 AgroSense AI** | Advanced Enterprise RAG Command Center. | Full conversational interface, FAISS semantic search, Groq LLM reasoning, multi-session history archive, transcript export, prompt pill groups. |
-
----
-
-## 📊 Sample Prompts for AgroSense AI
-- *"Which state has the highest agricultural yield and what crops drive it?"*
-- *"Compare average crop yield across all 8 crop varieties in India."*
-- *"What is the most profitable crop for farmers and what is its average net return?"*
-- *"Show the 10-year historical national yield trajectory from 2014 to 2024."*
-- *"Compare crop yield and farmer profit between Drip, Canal, and Sprinkler irrigation."*
+| **Dashboard Overview** | Executive summary of national agricultural metrics. | KPI metric cards, regional yield breakdowns, crop distribution charts, **Floating AI Bubble**. |
+| **Crop Analysis** | Comparative analysis across 8 major crop varieties. | Yield vs. input correlations, price-yield scatter plots, soil suitability charts, **Floating AI Bubble**. |
+| **Data Explorer** | Interactive dataset browser with multi-dimensional filtering. | State/Crop/Season filters, summary statistics, filtered CSV export, **Floating AI Bubble**. |
+| **Profitability Model Evaluation** | Rigorous evaluation of 9 ML algorithms for farm profit. | Holdout metrics ($R^2$, MAE, RMSE), TimeSeries CV, residual distribution plots, **Floating AI Bubble**. |
+| **Crop Yield Forecasting** | ML-driven expected yield prediction engine. | Farm parameter input form, Random Forest inference, sensitivity curves, regional benchmark charts, **Floating AI Bubble**. |
+| **Farmer Profitability Prediction** | End-to-end farm enterprise profitability forecasting. | Scale & input cost analysis, sensitivity curves ($\pm 20\%$), revenue/cost structure breakdown, **Floating AI Bubble**. |
 
 ---
 
