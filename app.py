@@ -1007,80 +1007,123 @@ def render_cv_section(kind, best_name):
 
 
 # =====================================================
-# 19b. AGROSENSE AI ENTERPRISE DIALOG MODAL & FLOATING BUBBLE
+# 19b. AGROSENSE AI ADVANCED CHATGPT / GEMINI / CLAUDE UI
 # =====================================================
 
 @st.dialog("🤖 AgroSense AI • Executive Agricultural Assistant", width="large")
 def open_agrosense_ai_dialog():
-    """Renders the complete AgroSense AI Enterprise Command Center inside a modern modal dialog."""
+    """Renders an advanced ChatGPT/Gemini/Claude split UI with left-side history and mobile view optimization."""
 
-    # --- Modern Glassmorphism & Styling CSS inside Dialog ---
+    # --- Modern Sleek Dark Theme CSS (ChatGPT / Gemini / Claude Aesthetics) ---
     st.markdown("""
     <style>
-    .ai-dialog-header {
-        background: linear-gradient(135deg, #0e2a1b 0%, #17452D 50%, #246B42 100%);
-        border: 1px solid #368254;
-        border-radius: 14px;
-        padding: 20px 24px;
-        margin-bottom: 18px;
-        color: #FFFFFF;
-        box-shadow: 0 6px 20px rgba(14,42,27,0.15);
+    /* Dialog base modal styling */
+    div[data-testid="stDialog"] {
+        background: #171717 !important;
+        border: 1px solid #2E7D32 !important;
+        border-radius: 18px !important;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7) !important;
+        color: #ECECEC !important;
     }
-    .ai-dialog-title {
-        font-size: 1.85rem;
-        font-weight: 800;
+    div[data-testid="stDialog"] * {
+        color: #ECECEC !important;
+    }
+    
+    /* Left Sidebar Panel (ChatGPT / Gemini / Claude History Panel) */
+    .chat-history-sidebar {
+        background: #1E1E1E;
+        border-right: 1px solid #2A2A2A;
+        border-radius: 12px;
+        padding: 14px 12px;
+        height: 100%;
+    }
+    
+    /* Active session pill */
+    .active-session-pill {
+        background: linear-gradient(135deg, #17452D 0%, #246B42 100%) !important;
+        border: 1px solid #00C853 !important;
+        border-radius: 8px !important;
+        padding: 6px 10px !important;
+        margin-bottom: 6px !important;
+        font-weight: 700 !important;
+    }
+    
+    /* History item pill */
+    .history-item-pill {
+        background: #262626 !important;
+        border: 1px solid #333333 !important;
+        border-radius: 8px !important;
+        padding: 6px 10px !important;
+        margin-bottom: 6px !important;
+        color: #B4B4B4 !important;
+        transition: all 0.2s ease !important;
+    }
+    .history-item-pill:hover {
+        background: #2E3A32 !important;
+        border-color: #368254 !important;
         color: #FFFFFF !important;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 10px;
     }
-    .ai-dialog-sub {
-        font-size: 0.95rem;
-        color: #A3D9B5 !important;
-        margin-top: 4px;
-        margin-bottom: 12px;
+    
+    /* User message card */
+    div[data-testid="stChatMessage"]:has(div:contains("Agribusiness Strategist")),
+    div[data-testid="stChatMessage"]:first-child {
+        background: #1F2E24 !important;
+        border: 1px solid #2E5C3B !important;
+        border-radius: 14px !important;
+        margin: 10px 0 !important;
+        padding: 12px 16px !important;
     }
-    .status-badge-strip {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
+    
+    /* AI Assistant message card */
+    div[data-testid="stChatMessage"] {
+        background: #1C1C1C !important;
+        border: 1px solid #2A2A2A !important;
+        border-radius: 14px !important;
+        margin: 10px 0 !important;
+        padding: 14px 18px !important;
     }
-    .status-badge {
-        background: rgba(255, 255, 255, 0.12);
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 20px;
-        padding: 4px 12px;
-        font-size: 0.78rem;
-        font-weight: 600;
-        color: #E8F5E9 !important;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
+
+    /* Modern Table styling in dark theme */
+    div[data-testid="stMarkdownContainer"] table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        margin: 12px 0 !important;
+        font-size: 0.92rem !important;
+        background: #141414 !important;
+        border: 1px solid #2A2A2A !important;
+        border-radius: 8px !important;
     }
-    .status-dot-green {
-        width: 7px;
-        height: 7px;
-        background-color: #00E676;
-        border-radius: 50%;
-        box-shadow: 0 0 7px #00E676;
+    div[data-testid="stMarkdownContainer"] th {
+        background: #1C2D22 !important;
+        color: #69F0AE !important;
+        padding: 10px 12px !important;
+        border-bottom: 2px solid #246B42 !important;
+        text-align: left !important;
+    }
+    div[data-testid="stMarkdownContainer"] td {
+        padding: 8px 12px !important;
+        border-bottom: 1px solid #242424 !important;
+        color: #E0E0E0 !important;
+    }
+
+    /* Mobile Responsive Optimizations */
+    @media (max-width: 768px) {
+        div[data-testid="stDialog"] {
+            width: 96vw !important;
+            max-width: 96vw !important;
+            min-width: 92vw !important;
+            height: 94vh !important;
+            max-height: 94vh !important;
+            padding: 10px !important;
+            margin: 0 auto !important;
+            top: 3vh !important;
+        }
+        div[data-testid="stDialog"] div[data-testid="stHorizontalBlock"] {
+            flex-direction: column !important;
+            gap: 12px !important;
+        }
     }
     </style>
-    """, unsafe_allow_html=True)
-
-    # --- Header Hero Banner ---
-    st.markdown("""
-    <div class="ai-dialog-header">
-        <div class="ai-dialog-title">🤖 AgroSense AI <span style="font-size:1rem; font-weight:600; background:#00E676; color:#0e2a1b; padding:2px 8px; border-radius:10px;">EXECUTIVE ADVISOR</span></div>
-        <div class="ai-dialog-sub">Senior Agricultural Decision Support System • RAG Ground-Truth Architecture • Zero Hallucination</div>
-        <div class="status-badge-strip">
-            <span class="status-badge"><span class="status-dot-green"></span> Groq Cloud LPU Accelerated</span>
-            <span class="status-badge"><span class="status-dot-green"></span> FAISS Vector Index (115 Nodes)</span>
-            <span class="status-badge"><span class="status-dot-green"></span> 7,920 Verified Records (2014–2024)</span>
-            <span class="status-badge">🛡️ Ground-Truth Constrained</span>
-        </div>
-    </div>
     """, unsafe_allow_html=True)
 
     import chatbot
@@ -1101,190 +1144,178 @@ def open_agrosense_ai_dialog():
         all_sessions = chatbot.load_all_sessions()
         current_session = all_sessions[0]
 
-    # --- TOP CONTROL BAR: Sessions, New Chat, Export, Clear, Close ---
-    ctrl_col1, ctrl_col2, ctrl_col3, ctrl_col4, ctrl_col5 = st.columns([4, 2, 2, 2, 2])
-    with ctrl_col1:
-        st.caption(f"📁 Thread: **{current_session.get('title', 'Executive Briefing')}** ({len(current_session.get('messages', []))} messages)")
-    with ctrl_col2:
-        if st.button("➕ New", key="dlg_btn_new_thread", use_container_width=True):
-            new_id = chatbot.create_new_session("New Agricultural Briefing")
-            st.session_state["active_session_id"] = new_id
-            st.rerun()
-    with ctrl_col3:
-        md_transcript = chatbot.export_session_markdown(current_session)
-        st.download_button(
-            "📥 Export",
-            data=md_transcript,
-            file_name=f"AgroSense_Briefing_{current_session['id']}.md",
-            mime="text/markdown",
-            key="dlg_btn_export_md",
-            use_container_width=True,
-            help="Download complete Q&A briefing transcript as Markdown"
-        )
-    with ctrl_col4:
-        if st.button("🗑️ Delete", key="dlg_btn_del_curr_thread", use_container_width=True):
-            chatbot.delete_session(st.session_state["active_session_id"])
-            rem = chatbot.load_all_sessions()
-            if rem:
-                st.session_state["active_session_id"] = rem[0]["id"]
-            else:
-                st.session_state["active_session_id"] = chatbot.create_new_session("New Session")
-            st.rerun()
-    with ctrl_col5:
-        if st.button("✕ Close", key="dlg_btn_close", use_container_width=True):
-            st.session_state["show_chat_dialog"] = False
-            st.rerun()
-
-    # --- EXPANDABLE: Chat History Archive (Read, Resume, Delete) ---
-    with st.expander("📜 **Conversation History Archive (Read / Resume / Delete Past Briefings)**", expanded=False):
-        if len(all_sessions) > 0:
-            hist_tabs = st.tabs([f"Thread {i+1}: {s.get('title', 'Session')[:24]}" for i, s in enumerate(all_sessions[:6])])
-            for idx, tab in enumerate(hist_tabs):
-                s_data = all_sessions[idx]
-                with tab:
-                    c1, c2, c3 = st.columns([7, 2, 2])
-                    with c1:
-                        st.markdown(f"**Session Title:** {s_data.get('title')} | *Created on {s_data.get('created_at')}* | **{len(s_data.get('messages', []))} exchanges**")
-                    with c2:
-                        if st.button("🔄 Resume", key=f"dlg_resume_{s_data['id']}", use_container_width=True):
-                            st.session_state["active_session_id"] = s_data["id"]
-                            st.rerun()
-                    with c3:
-                        if st.button("🗑️ Delete", key=f"dlg_del_{s_data['id']}", use_container_width=True):
-                            chatbot.delete_session(s_data["id"])
-                            st.rerun()
-
-                    st.divider()
-                    for m in s_data.get("messages", []):
-                        role_icon = "🧑‍🌾 **You:**" if m["role"] == "user" else "🤖 **AgroSense AI:**"
-                        st.markdown(f"{role_icon} {m['content']}")
-                        if m.get("chart_title"):
-                            st.caption(f"📊 Chart Generated: {m['chart_title']}")
-        else:
-            st.info("No saved chat sessions found in archive.")
-
-    st.markdown("---")
-
-    # --- CATEGORIZED QUICK PROMPT PILLS ---
-    st.markdown("#### 💡 Executive Inquiries & Scenario Prompts")
-    qp_tab1, qp_tab2, qp_tab3, qp_tab4 = st.tabs(["🌾 Yield & Agronomy", "💰 Profitability", "📈 Macro Trends", "🤖 ML Predictions"])
+    # --- TWO-COLUMN CHATGPT / GEMINI / CLAUDE LAYOUT ---
+    col_history, col_main = st.columns([1, 2.5])
 
     pending_query = None
 
-    with qp_tab1:
-        y_c1, y_c2, y_c3 = st.columns(3)
-        with y_c1:
-            if st.button("🌾 Highest yielding state?", key="dlg_qp_y1", use_container_width=True):
-                pending_query = "Which state has the highest agricultural yield and what crops drive it?"
-        with y_c2:
-            if st.button("🌱 Compare yield by crop variety", key="dlg_qp_y2", use_container_width=True):
-                pending_query = "Compare average crop yield across all 8 crop varieties in India."
-        with y_c3:
-            if st.button("🪨 Optimal soil for wheat & rice?", key="dlg_qp_y3", use_container_width=True):
-                pending_query = "What is the average yield across different soil types and which is optimal?"
+    # =========================================================================
+    # LEFT COLUMN: CHAT HISTORY SIDEBAR (Matches ChatGPT / Gemini / Claude)
+    # =========================================================================
+    with col_history:
+        # Header with Logo & Pro Badge
+        st.markdown("""
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid #282828;">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:1.35rem;">🤖</span>
+                <span style="font-weight:800; font-size:1.15rem; color:#FFFFFF;">AgroSense</span>
+            </div>
+            <span style="font-size:0.75rem; background:#00E676; color:#0e2a1b; padding:2px 8px; border-radius:12px; font-weight:800;">LPU ACTIVE</span>
+        </div>
+        """, unsafe_allow_html=True)
 
-    with qp_tab2:
-        p_c1, p_c2, p_c3 = st.columns(3)
-        with p_c1:
-            if st.button("💰 Most profitable crop?", key="dlg_qp_p1", use_container_width=True):
-                pending_query = "What is the most profitable crop for farmers and what is its average net return?"
-        with p_c2:
-            if st.button("🗺️ Compare profit by state", key="dlg_qp_p2", use_container_width=True):
-                pending_query = "Which states generate the highest average farmer profit in INR?"
-        with p_c3:
-            if st.button("🏷️ Market price benchmark ranking", key="dlg_qp_p3", use_container_width=True):
-                pending_query = "Rank all crops by benchmark market price per ton."
+        # ➕ New chat pill button (just like in ChatGPT / Gemini / Claude screenshots!)
+        if st.button("➕ New chat", key="btn_new_chat_sidebar", use_container_width=True):
+            new_id = chatbot.create_new_session("New Agricultural Briefing")
+            st.session_state["active_session_id"] = new_id
+            st.rerun()
 
-    with qp_tab3:
-        t_c1, t_c2, t_c3 = st.columns(3)
-        with t_c1:
-            if st.button("📈 10-year yield trajectory", key="dlg_qp_t1", use_container_width=True):
-                pending_query = "Show the 10-year historical national yield trajectory from 2014 to 2024."
-        with t_c2:
-            if st.button("💧 Drip vs Canal efficiency", key="dlg_qp_t2", use_container_width=True):
-                pending_query = "Compare crop yield and farmer profit between Drip, Canal, and Sprinkler irrigation."
-        with t_c3:
-            if st.button("🌦️ Kharif vs Rabi season returns", key="dlg_qp_t3", use_container_width=True):
-                pending_query = "Compare average agricultural yield and farmer profit between Kharif, Rabi, and Zaid seasons."
+        st.markdown('<p style="font-size:0.75rem; color:#8E9F93; font-weight:700; text-transform:uppercase; margin-top:14px; margin-bottom:6px; letter-spacing:0.6px;">Recent Briefings</p>', unsafe_allow_html=True)
 
-    with qp_tab4:
-        m_c1, m_c2, m_c3 = st.columns(3)
-        with m_c1:
-            if st.button("🤖 Explain Profitability ML Model", key="dlg_qp_m1", use_container_width=True):
-                pending_query = "Explain how machine learning predicts farmer profitability and what are the dominant features."
-        with m_c2:
-            if st.button("🌲 Random Forest Yield Dynamics", key="dlg_qp_m2", use_container_width=True):
-                pending_query = "How does Random Forest regression model crop yield from weather and farming conditions?"
-        with m_c3:
-            if st.button("📉 Input Cost vs Profit Sensitivity", key="dlg_qp_m3", use_container_width=True):
-                pending_query = "What is the sensitivity of net farmer profit to fertilizer and pesticide input costs?"
+        # List of past chat sessions
+        if all_sessions:
+            for s in all_sessions[:8]:
+                is_active = (s["id"] == st.session_state["active_session_id"])
+                c_title, c_del = st.columns([5, 1])
+                with c_title:
+                    btn_label = f"💬 {s.get('title', 'Session')[:20]}"
+                    btn_type = "primary" if is_active else "secondary"
+                    if st.button(btn_label, key=f"hist_s_{s['id']}", use_container_width=True, type=btn_type):
+                        st.session_state["active_session_id"] = s["id"]
+                        st.rerun()
+                with c_del:
+                    if st.button("🗑️", key=f"hist_del_{s['id']}", help="Delete this session"):
+                        chatbot.delete_session(s["id"])
+                        rem = chatbot.load_all_sessions()
+                        if rem:
+                            st.session_state["active_session_id"] = rem[0]["id"]
+                        else:
+                            st.session_state["active_session_id"] = chatbot.create_new_session("New Session")
+                        st.rerun()
+        else:
+            st.caption("No saved conversations yet.")
 
-    st.markdown("---")
+        st.markdown("---")
 
-    # --- DISPLAY MESSAGE HISTORY IN ACTIVE SESSION ---
-    messages = current_session.get("messages", [])
+        # User Profile Badge at bottom left (matches ChatGPT / Gemini / Claude profile footer)
+        st.markdown("""
+        <div style="display:flex; align-items:center; gap:10px; padding:8px 8px; border-radius:10px; background:#212121; margin-top:10px; border:1px solid #2E2E2E;">
+            <div style="width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg, #17452D 0%, #00C853 100%); color:#FFFFFF; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.9rem;">AK</div>
+            <div>
+                <div style="font-size:0.88rem; font-weight:700; color:#FFFFFF;">Aadish Kotadia</div>
+                <div style="font-size:0.72rem; color:#A3D9B5;">AgriSmart Analyst • SEM 3 MBA</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-    if not messages:
-        st.info(
-            "👋 **AgroSense AI is standing by.** Select any inquiry prompt above, or type your custom agribusiness question below. "
-            "Every response includes an **Executive Summary**, a **Quantitative Benchmark Table**, **Strategic Management Solutions**, and an **Interactive Plotly Graph**."
+        # Export Transcript & Close Buttons
+        exp_c1, exp_c2 = st.columns(2)
+        with exp_c1:
+            md_transcript = chatbot.export_session_markdown(current_session)
+            st.download_button(
+                "📥 Export",
+                data=md_transcript,
+                file_name=f"AgroSense_{current_session['id']}.md",
+                mime="text/markdown",
+                key="sb_export_btn",
+                use_container_width=True,
+                help="Download session transcript as Markdown"
+            )
+        with exp_c2:
+            if st.button("✕ Close", key="sb_close_dialog_btn", use_container_width=True):
+                st.session_state["show_chat_dialog"] = False
+                st.rerun()
+
+    # =========================================================================
+    # RIGHT COLUMN: MAIN CONVERSATION CANVAS (ChatGPT / Gemini / Claude Center)
+    # =========================================================================
+    with col_main:
+        messages = current_session.get("messages", [])
+
+        # --- If no messages: Hero Greeting & Suggestion Chips (Gemini/Claude style) ---
+        if not messages:
+            st.markdown("""
+            <div style="text-align:center; padding: 25px 15px 15px 15px;">
+                <div style="font-size: 2.4rem; margin-bottom: 6px;">🌾</div>
+                <h2 style="font-size: 1.85rem; font-weight: 800; color: #FFFFFF !important; margin: 0;">Where should we start?</h2>
+                <p style="color: #A3D9B5; font-size: 0.98rem; margin-top: 4px; margin-bottom: 18px;">Senior Decision Support • 7,920 Historical Records (2014–2024)</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            # Suggestion Chips in 2 Columns (Matching Gemini & Claude screenshots)
+            st.markdown('<p style="font-size:0.78rem; color:#8E9F93; font-weight:700; text-transform:uppercase; margin-bottom:8px; letter-spacing:0.5px;">Suggested Inquiries</p>', unsafe_allow_html=True)
+            sc1, sc2 = st.columns(2)
+            with sc1:
+                if st.button("🌾 Which state produces highest Wheat yield?", key="sug_chip_1", use_container_width=True):
+                    pending_query = "Which state produces the highest Wheat yield and what are the agronomic drivers?"
+                if st.button("💰 What is the most profitable crop in Kharif?", key="sug_chip_2", use_container_width=True):
+                    pending_query = "What is the most profitable crop during the Kharif season and what is its net return?"
+                if st.button("🪨 Optimal soil suitability for Cotton & Rice", key="sug_chip_3", use_container_width=True):
+                    pending_query = "Compare crop productivity across soil classifications and identify the best soil for Cotton and Rice."
+            with sc2:
+                if st.button("📈 10-year historical national yield trajectory", key="sug_chip_4", use_container_width=True):
+                    pending_query = "Show the 10-year historical national crop yield trajectory from 2014 to 2024."
+                if st.button("💧 Drip vs Canal vs Sprinkler efficiency", key="sug_chip_5", use_container_width=True):
+                    pending_query = "Compare agricultural yield and farmer profit between Drip, Canal, and Sprinkler irrigation."
+                if st.button("🤖 How is farmer profitability predicted by ML?", key="sug_chip_6", use_container_width=True):
+                    pending_query = "Explain how machine learning predicts farmer profitability and what are the dominant features."
+        else:
+            # --- Render Chat Messages (ChatGPT / Claude message bubble cards) ---
+            for msg in messages:
+                if msg["role"] == "user":
+                    with st.chat_message("user", avatar="🧑‍🌾"):
+                        st.markdown(f"**Agribusiness Strategist** • *{msg.get('timestamp', '')}*")
+                        st.markdown(msg["content"])
+                else:
+                    with st.chat_message("assistant", avatar="🤖"):
+                        st.markdown(f"**AgroSense AI Executive Brief** • *{msg.get('timestamp', '')}*")
+                        st.markdown(msg["content"])
+                        # Reconstruct chart if chart_title was saved
+                        if msg.get("chart_title"):
+                            fig = chatbot.generate_dynamic_chart(msg.get("chart_title"))
+                            if fig is not None:
+                                st.plotly_chart(fig, use_container_width=True)
+
+        # --- Centered Prompt Input Bar (Matching ChatGPT / Gemini / Claude screenshots) ---
+        user_input = st.chat_input(
+            "Ask AgroSense AI anything about Indian crops, yields, profits, states, soils, weather, ML models…",
+            key="gemini_style_chat_input"
         )
-    else:
-        for msg in messages:
-            if msg["role"] == "user":
-                with st.chat_message("user", avatar="🧑‍🌾"):
-                    st.markdown(f"**Agribusiness Strategist** • *{msg.get('timestamp', '')}*")
-                    st.markdown(msg["content"])
-            else:
-                with st.chat_message("assistant", avatar="🤖"):
-                    st.markdown(f"**AgroSense AI Executive Brief** • *{msg.get('timestamp', '')}*")
-                    st.markdown(msg["content"])
-                    # Reconstruct chart if chart_title was saved
-                    if msg.get("chart_title"):
-                        fig = chatbot.generate_dynamic_chart(msg.get("chart_title"))
-                        if fig is not None:
-                            st.plotly_chart(fig, use_container_width=True)
 
-    # --- CHAT INPUT BAR ---
-    user_input = st.chat_input(
-        "Ask AgroSense AI anything about Indian crops, yields, profits, states, soils, weather, ML models…",
-        key="dlg_chat_input"
-    )
+        query = pending_query or user_input
 
-    query = pending_query or user_input
+        if query:
+            # 1. Append user query to session
+            chatbot.append_message_to_session(
+                st.session_state["active_session_id"],
+                role="user",
+                content=query
+            )
 
-    if query:
-        # 1. Append user query to session
-        chatbot.append_message_to_session(
-            st.session_state["active_session_id"],
-            role="user",
-            content=query
-        )
+            # 2. Thinking indicator
+            with st.spinner("🤖 AgroSense AI is thinking... Analyzing 7,920 records & synthesizing executive solution..."):
+                try:
+                    session_history = [
+                        {"role": m["role"], "content": m["content"]}
+                        for m in current_session.get("messages", [])
+                    ]
+                    answer, fig = chatbot.chat(query, session_history)
 
-        # 2. Thinking indicator
-        with st.spinner("🤖 AgroSense AI is thinking... Analyzing 7,920 records & synthesizing executive solution..."):
-            try:
-                session_history = [
-                    {"role": m["role"], "content": m["content"]}
-                    for m in current_session.get("messages", [])
-                ]
-                answer, fig = chatbot.chat(query, session_history)
+                    chart_title = query if fig is not None else None
+                    chatbot.append_message_to_session(
+                        st.session_state["active_session_id"],
+                        role="assistant",
+                        content=answer,
+                        chart_title=chart_title
+                    )
+                except Exception as e:
+                    chatbot.append_message_to_session(
+                        st.session_state["active_session_id"],
+                        role="assistant",
+                        content=f"⚠️ Briefing synthesis halted: `{e}`. Please check system connectivity and credentials."
+                    )
 
-                chart_title = query if fig is not None else None
-                chatbot.append_message_to_session(
-                    st.session_state["active_session_id"],
-                    role="assistant",
-                    content=answer,
-                    chart_title=chart_title
-                )
-            except Exception as e:
-                chatbot.append_message_to_session(
-                    st.session_state["active_session_id"],
-                    role="assistant",
-                    content=f"⚠️ Briefing synthesis halted: `{e}`. Please check system connectivity and credentials."
-                )
-
-        st.rerun()
+            st.rerun()
 
 
 # =====================================================
@@ -1293,10 +1324,10 @@ def open_agrosense_ai_dialog():
 
 def render_floating_chat_bubble():
     """
-    Renders an elegant, small circular floating chat bubble in the bottom-right corner of EVERY page.
-    NOT a wide dropdown button. Clicking the bubble launches the complete AgroSense AI modal.
+    Renders an elegant circular floating chat bubble in the bottom-right corner of EVERY page.
+    Clicking the bubble launches the complete ChatGPT/Gemini/Claude modal dialog.
     """
-    # 1. Dedicated Floating Bubble CSS
+    # 1. Floating Bubble CSS with Mobile View Media Queries
     st.markdown("""
     <style>
     /* Fixed Floating Chat Bubble at Bottom Right */
@@ -1309,7 +1340,6 @@ def render_floating_chat_bubble():
         align-items: center;
         gap: 8px;
     }
-    /* Style the trigger button specifically */
     div:has(> .agro-bubble-fixed-container) + div[data-testid="stButton"] button,
     div[data-testid="stButton"]:has(button#agro_floating_btn) button,
     button[key="agro_floating_btn"],
@@ -1344,6 +1374,20 @@ def render_floating_chat_bubble():
         box-shadow: 0 14px 32px rgba(0,200,83,0.6) !important;
         border-color: #FFFFFF !important;
     }
+    
+    /* Mobile Responsive Sizing */
+    @media (max-width: 768px) {
+        div:has(> .agro-bubble-fixed-container) + div[data-testid="stButton"] button,
+        button[key="agro_floating_btn"] {
+            bottom: 18px !important;
+            right: 18px !important;
+            width: 54px !important;
+            height: 54px !important;
+            min-width: 54px !important;
+            min-height: 54px !important;
+            font-size: 24px !important;
+        }
+    }
     </style>
     <div class="agro-bubble-fixed-container"></div>
     """, unsafe_allow_html=True)
@@ -1352,7 +1396,7 @@ def render_floating_chat_bubble():
     if st.button("💬", key="agro_floating_btn", help="Open AgroSense AI Copilot"):
         st.session_state["show_chat_dialog"] = True
 
-    # 3. JavaScript Helper to ensure circular bubble positioning on all browsers
+    # 3. JavaScript Helper for universal browser positioning
     st.components.v1.html("""
     <script>
     const setupBubble = () => {
