@@ -1017,6 +1017,11 @@ def open_agrosense_ai_dialog():
     # --- High-Contrast Professional Styling CSS ---
     st.markdown("""
     <style>
+    /* Lock entire background page and prevent background scrolling while dialog is active */
+    body:has(div[data-testid="stDialog"]) {
+        overflow: hidden !important;
+    }
+
     /* Dialog base modal styling - Solid opaque white with emerald accent */
     div[data-testid="stDialog"] [role="dialog"],
     div[data-testid="stDialog"] > div {
@@ -1027,6 +1032,33 @@ def open_agrosense_ai_dialog():
         box-shadow: 0 24px 70px rgba(23, 69, 45, 0.25) !important;
         color: #17452D !important;
         opacity: 1 !important;
+        max-height: 90vh !important;
+        overflow-y: hidden !important; /* CRITICAL: Entire modal frame will NOT scroll */
+        overflow-x: hidden !important;
+    }
+    div[data-testid="stDialog"] [role="dialog"] > div {
+        overflow-y: hidden !important;
+        overflow-x: hidden !important;
+    }
+
+    /* Clean custom scrollbar for messages and session history */
+    div[data-testid="stDialog"] [data-testid="stVerticalBlockBorderWrapper"] > div {
+        scrollbar-width: thin !important;
+        scrollbar-color: #A3D9B5 #F4F8F5 !important;
+    }
+    div[data-testid="stDialog"] [data-testid="stVerticalBlockBorderWrapper"] > div::-webkit-scrollbar {
+        width: 6px !important;
+    }
+    div[data-testid="stDialog"] [data-testid="stVerticalBlockBorderWrapper"] > div::-webkit-scrollbar-track {
+        background: #F4F8F5 !important;
+        border-radius: 4px !important;
+    }
+    div[data-testid="stDialog"] [data-testid="stVerticalBlockBorderWrapper"] > div::-webkit-scrollbar-thumb {
+        background-color: #A3D9B5 !important;
+        border-radius: 6px !important;
+    }
+    div[data-testid="stDialog"] [data-testid="stVerticalBlockBorderWrapper"] > div::-webkit-scrollbar-thumb:hover {
+        background-color: #246B42 !important;
     }
     div[data-testid="stDialog"] {
         background-color: rgba(14, 38, 24, 0.65) !important;
@@ -1214,28 +1246,29 @@ def open_agrosense_ai_dialog():
 
         st.markdown('<p style="font-size:0.78rem; color:#205B38; font-weight:800; text-transform:uppercase; margin-top:14px; margin-bottom:8px; letter-spacing:0.7px;">Recent Briefings</p>', unsafe_allow_html=True)
 
-        # List of past chat sessions
-        if all_sessions:
-            for s in all_sessions[:8]:
-                is_active = (s["id"] == st.session_state["active_session_id"])
-                c_title, c_del = st.columns([5, 1])
-                with c_title:
-                    btn_label = f"💬 {s.get('title', 'Session')[:20]}"
-                    btn_type = "primary" if is_active else "secondary"
-                    if st.button(btn_label, key=f"hist_s_{s['id']}", use_container_width=True, type=btn_type):
-                        st.session_state["active_session_id"] = s["id"]
-                        st.rerun()
-                with c_del:
-                    if st.button("🗑️", key=f"hist_del_{s['id']}", help="Delete this session"):
-                        chatbot.delete_session(s["id"])
-                        rem = chatbot.load_all_sessions()
-                        if rem:
-                            st.session_state["active_session_id"] = rem[0]["id"]
-                        else:
-                            st.session_state["active_session_id"] = chatbot.create_new_session("New Session")
-                        st.rerun()
-        else:
-            st.caption("No saved conversations yet.")
+        # List of past chat sessions in a fixed-height scrollable container
+        with st.container(height=310, border=False):
+            if all_sessions:
+                for s in all_sessions[:12]:
+                    is_active = (s["id"] == st.session_state["active_session_id"])
+                    c_title, c_del = st.columns([5, 1])
+                    with c_title:
+                        btn_label = f"💬 {s.get('title', 'Session')[:20]}"
+                        btn_type = "primary" if is_active else "secondary"
+                        if st.button(btn_label, key=f"hist_s_{s['id']}", use_container_width=True, type=btn_type):
+                            st.session_state["active_session_id"] = s["id"]
+                            st.rerun()
+                    with c_del:
+                        if st.button("🗑️", key=f"hist_del_{s['id']}", help="Delete this session"):
+                            chatbot.delete_session(s["id"])
+                            rem = chatbot.load_all_sessions()
+                            if rem:
+                                st.session_state["active_session_id"] = rem[0]["id"]
+                            else:
+                                st.session_state["active_session_id"] = chatbot.create_new_session("New Session")
+                            st.rerun()
+            else:
+                st.caption("No saved conversations yet.")
 
         st.markdown("---")
 
@@ -1274,50 +1307,57 @@ def open_agrosense_ai_dialog():
     with col_main:
         messages = current_session.get("messages", [])
 
-        # --- If no messages: Hero Greeting & Suggestion Chips (Gemini/Claude style) ---
-        if not messages:
-            st.markdown("""
-            <div style="text-align:center; padding: 25px 15px 18px 15px;">
-                <div style="font-size: 2.5rem; margin-bottom: 6px;">🌾</div>
-                <h2 style="font-size: 2rem; font-weight: 850; color: #17452D !important; margin: 0;">Where should we start?</h2>
-                <p style="color: #35483A !important; font-size: 1.05rem; font-weight: 600; margin-top: 6px; margin-bottom: 20px;">Senior Decision Support • 7,920 Historical Records (2014–2024)</p>
-            </div>
-            """, unsafe_allow_html=True)
+        # =====================================================================
+        # SCROLLABLE MESSAGE CONTAINER (ONLY MESSAGES SCROLL, FIXED 520PX)
+        # =====================================================================
+        with st.container(height=520, border=False, autoscroll=True):
+            # --- If no messages: Hero Greeting & Suggestion Chips (Gemini/Claude style) ---
+            if not messages:
+                st.markdown("""
+                <div style="text-align:center; padding: 25px 15px 18px 15px;">
+                    <div style="font-size: 2.5rem; margin-bottom: 6px;">🌾</div>
+                    <h2 style="font-size: 2rem; font-weight: 850; color: #17452D !important; margin: 0;">Where should we start?</h2>
+                    <p style="color: #35483A !important; font-size: 1.05rem; font-weight: 600; margin-top: 6px; margin-bottom: 20px;">Senior Decision Support • 7,920 Historical Records (2014–2024)</p>
+                </div>
+                """, unsafe_allow_html=True)
 
-            # Suggestion Chips in 2 Columns (Matching Gemini & Claude screenshots)
-            st.markdown('<p style="font-size:0.8rem; color:#205B38; font-weight:800; text-transform:uppercase; margin-bottom:10px; letter-spacing:0.7px;">Suggested Inquiries</p>', unsafe_allow_html=True)
-            sc1, sc2 = st.columns(2)
-            with sc1:
-                if st.button("🌾 Which state produces highest Wheat yield?", key="sug_chip_1", use_container_width=True):
-                    pending_query = "Which state produces the highest Wheat yield and what are the agronomic drivers?"
-                if st.button("💰 What is the most profitable crop in Kharif?", key="sug_chip_2", use_container_width=True):
-                    pending_query = "What is the most profitable crop during the Kharif season and what is its net return?"
-                if st.button("🪨 Optimal soil suitability for Cotton & Rice", key="sug_chip_3", use_container_width=True):
-                    pending_query = "Compare crop productivity across soil classifications and identify the best soil for Cotton and Rice."
-            with sc2:
-                if st.button("📈 10-year historical national yield trajectory", key="sug_chip_4", use_container_width=True):
-                    pending_query = "Show the 10-year historical national crop yield trajectory from 2014 to 2024."
-                if st.button("💧 Drip vs Canal vs Sprinkler efficiency", key="sug_chip_5", use_container_width=True):
-                    pending_query = "Compare agricultural yield and farmer profit between Drip, Canal, and Sprinkler irrigation."
-                if st.button("🤖 How is farmer profitability predicted by ML?", key="sug_chip_6", use_container_width=True):
-                    pending_query = "Explain how machine learning predicts farmer profitability and what are the dominant features."
-        else:
-            # --- Render Chat Messages (ChatGPT / Claude message bubble cards) ---
-            for msg in messages:
-                if msg["role"] == "user":
-                    with st.chat_message("user", avatar="🧑‍🌾"):
-                        st.markdown(f"**Agribusiness Strategist** • *{msg.get('timestamp', '')}*")
-                        st.markdown(msg["content"])
-                else:
-                    with st.chat_message("assistant", avatar="🤖"):
-                        st.markdown(f"**AgroSense AI Executive Brief** • *{msg.get('timestamp', '')}*")
-                        st.markdown(msg["content"])
-                        # Reconstruct chart if chart_title was saved
-                        if msg.get("chart_title"):
-                            fig = chatbot.generate_dynamic_chart(msg.get("chart_title"))
-                            if fig is not None:
-                                st.plotly_chart(fig, use_container_width=True)
+                # Suggestion Chips in 2 Columns (Matching Gemini & Claude screenshots)
+                st.markdown('<p style="font-size:0.8rem; color:#205B38; font-weight:800; text-transform:uppercase; margin-bottom:10px; letter-spacing:0.7px;">Suggested Inquiries</p>', unsafe_allow_html=True)
+                sc1, sc2 = st.columns(2)
+                with sc1:
+                    if st.button("🌾 Which state produces highest Wheat yield?", key="sug_chip_1", use_container_width=True):
+                        pending_query = "Which state produces the highest Wheat yield and what are the agronomic drivers?"
+                    if st.button("💰 What is the most profitable crop in Kharif?", key="sug_chip_2", use_container_width=True):
+                        pending_query = "What is the most profitable crop during the Kharif season and what is its net return?"
+                    if st.button("🪨 Optimal soil suitability for Cotton & Rice", key="sug_chip_3", use_container_width=True):
+                        pending_query = "Compare crop productivity across soil classifications and identify the best soil for Cotton and Rice."
+                with sc2:
+                    if st.button("📈 10-year historical national yield trajectory", key="sug_chip_4", use_container_width=True):
+                        pending_query = "Show the 10-year historical national crop yield trajectory from 2014 to 2024."
+                    if st.button("💧 Drip vs Canal vs Sprinkler efficiency", key="sug_chip_5", use_container_width=True):
+                        pending_query = "Compare agricultural yield and farmer profit between Drip, Canal, and Sprinkler irrigation."
+                    if st.button("🤖 How is farmer profitability predicted by ML?", key="sug_chip_6", use_container_width=True):
+                        pending_query = "Explain how machine learning predicts farmer profitability and what are the dominant features."
+            else:
+                # --- Render Chat Messages (ChatGPT / Claude message bubble cards) ---
+                for msg in messages:
+                    if msg["role"] == "user":
+                        with st.chat_message("user", avatar="🧑‍🌾"):
+                            st.markdown(f"**Agribusiness Strategist** • *{msg.get('timestamp', '')}*")
+                            st.markdown(msg["content"])
+                    else:
+                        with st.chat_message("assistant", avatar="🤖"):
+                            st.markdown(f"**AgroSense AI Executive Brief** • *{msg.get('timestamp', '')}*")
+                            st.markdown(msg["content"])
+                            # Reconstruct chart if chart_title was saved
+                            if msg.get("chart_title"):
+                                fig = chatbot.generate_dynamic_chart(msg.get("chart_title"))
+                                if fig is not None:
+                                    st.plotly_chart(fig, use_container_width=True)
 
+        # =====================================================================
+        # PINNED INPUT BAR (OUTSIDE THE CONTAINER, PERMANENTLY FIXED AT BOTTOM)
+        # =====================================================================
         # --- Centered Prompt Input Bar (Matching ChatGPT / Gemini / Claude screenshots) ---
         user_input = st.chat_input(
             "Ask AgroSense AI anything about Indian crops, yields, profits, states, soils, weather, ML models…",
