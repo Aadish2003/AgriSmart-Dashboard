@@ -1027,48 +1027,68 @@ def open_agrosense_ai_dialog():
     div[data-testid="stDialog"] > div {
         background-color: #FFFFFF !important;
         border: 2px solid #246B42 !important;
-        border-top: 6px solid #17452D !important;
-        border-radius: 16px !important;
-        box-shadow: 0 24px 70px rgba(23, 69, 45, 0.25) !important;
+        border-top: 5px solid #17452D !important;
+        border-radius: 14px !important;
+        box-shadow: 0 20px 60px rgba(23, 69, 45, 0.22) !important;
         color: #17452D !important;
         opacity: 1 !important;
-        max-height: 92vh !important;
+        max-height: 90vh !important;
         overflow-y: auto !important; /* Graceful scroll fallback on tiny screens */
         overflow-x: hidden !important;
+        padding: 14px 18px !important;
     }
     div[data-testid="stDialog"] [role="dialog"] > div {
         overflow-y: visible !important;
         overflow-x: hidden !important;
     }
 
-    /* Pinned, high-contrast, crystal-clear Chat Input Bar */
+    /* Pinned, clean, compact pill Chat Input Bar - no bloated outer gray wrapper */
     div[data-testid="stDialog"] div[data-testid="stChatInput"] {
-        margin-top: 10px !important;
-        margin-bottom: 4px !important;
-        width: 100% !important;
+        background: transparent !important;
+        padding: 0 !important;
+        margin-top: 6px !important;
+        margin-bottom: 2px !important;
+        border: none !important;
+        box-shadow: none !important;
         position: relative !important;
         z-index: 100 !important;
     }
+    div[data-testid="stDialog"] div[data-testid="stChatInput"] > div {
+        background: #FFFFFF !important;
+        border: 1.5px solid #246B42 !important;
+        border-radius: 24px !important;
+        padding: 2px 10px !important;
+        box-shadow: 0 2px 8px rgba(23, 69, 45, 0.08) !important;
+        transition: all 0.2s ease !important;
+    }
+    div[data-testid="stDialog"] div[data-testid="stChatInput"] > div:focus-within {
+        border-color: #00C853 !important;
+        box-shadow: 0 0 0 3px rgba(0, 200, 83, 0.22) !important;
+    }
     div[data-testid="stDialog"] div[data-testid="stChatInput"] textarea {
-        background-color: #FFFFFF !important;
-        border: 2px solid #246B42 !important;
-        border-radius: 12px !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
         color: #17452D !important;
-        font-size: 0.96rem !important;
-        font-weight: 600 !important;
-        box-shadow: 0 3px 12px rgba(23, 69, 45, 0.10) !important;
-        padding: 12px 16px !important;
+        font-size: 0.90rem !important;
+        font-weight: 550 !important;
+        padding: 6px 10px !important;
+        min-height: 38px !important;
     }
     div[data-testid="stDialog"] div[data-testid="stChatInput"] textarea:focus {
-        border-color: #00C853 !important;
-        box-shadow: 0 0 0 3px rgba(0, 200, 83, 0.25) !important;
+        outline: none !important;
+        border: none !important;
+        box-shadow: none !important;
     }
     div[data-testid="stDialog"] div[data-testid="stChatInput"] textarea::placeholder {
         color: #557A60 !important;
-        font-weight: 550 !important;
+        font-weight: 500 !important;
+        font-size: 0.88rem !important;
     }
     div[data-testid="stDialog"] div[data-testid="stChatInput"] button {
         color: #246B42 !important;
+        background: transparent !important;
+        border: none !important;
     }
 
     /* Clean custom scrollbar for messages and session history */
@@ -1120,15 +1140,15 @@ def open_agrosense_ai_dialog():
     div[data-testid="stDialog"] div[data-testid="stHorizontalBlock"] div[data-testid="stButton"] button {
         background-color: #FFFFFF !important;
         border: 1.5px solid #A3D9B5 !important;
-        border-radius: 10px !important;
+        border-radius: 8px !important;
         color: #17452D !important;
-        font-size: 0.94rem !important;
-        font-weight: 750 !important;
+        font-size: 0.88rem !important;
+        font-weight: 700 !important;
         text-align: left !important;
-        padding: 11px 15px !important;
-        min-height: 50px !important;
-        box-shadow: 0 2px 6px rgba(23, 69, 45, 0.05) !important;
-        transition: all 0.22s ease !important;
+        padding: 8px 12px !important;
+        min-height: 42px !important;
+        box-shadow: 0 1px 4px rgba(23, 69, 45, 0.05) !important;
+        transition: all 0.2s ease !important;
     }
     div[data-testid="stDialog"] div[data-testid="stHorizontalBlock"] div[data-testid="stButton"] button:hover {
         background-color: #E8F5E9 !important;
@@ -1152,55 +1172,59 @@ def open_agrosense_ai_dialog():
         border-color: #17452D !important;
     }
     
-    /* User Chat Message Bubble */
+    /* User Chat Message Bubble - Compact & Tight */
     div[data-testid="stChatMessage"]:has(div:contains("Agribusiness Strategist")),
     div[data-testid="stChatMessage"]:first-child {
         background-color: #EBF5EE !important;
         border: 1px solid #C4E2CC !important;
-        border-radius: 14px !important;
-        margin: 10px 0 !important;
-        padding: 12px 18px !important;
+        border-radius: 10px !important;
+        margin: 4px 0 !important;
+        padding: 8px 12px !important;
     }
     div[data-testid="stChatMessage"]:has(div:contains("Agribusiness Strategist")) * {
         color: #17452D !important;
+        font-size: 0.92rem !important;
     }
     
-    /* AI Assistant Chat Message Card */
+    /* AI Assistant Chat Message Card - Compact & Tight */
     div[data-testid="stChatMessage"] {
         background-color: #FFFFFF !important;
         border: 1px solid #DCE7DD !important;
-        border-left: 5px solid #246B42 !important;
-        border-radius: 14px !important;
-        margin: 12px 0 !important;
-        padding: 16px 20px !important;
-        box-shadow: 0 4px 14px rgba(23, 69, 45, 0.06) !important;
+        border-left: 4px solid #246B42 !important;
+        border-radius: 10px !important;
+        margin: 6px 0 !important;
+        padding: 10px 14px !important;
+        box-shadow: 0 2px 6px rgba(23, 69, 45, 0.04) !important;
     }
     div[data-testid="stChatMessage"] * {
         color: #203528 !important;
+        font-size: 0.92rem !important;
     }
 
-    /* Structured Markdown Tables inside Dialog */
+    /* Structured Markdown Tables inside Dialog - Dense & Sleek */
     div[data-testid="stDialog"] div[data-testid="stMarkdownContainer"] table {
         width: 100% !important;
         border-collapse: collapse !important;
-        margin: 14px 0 !important;
-        font-size: 0.94rem !important;
+        margin: 6px 0 !important;
+        font-size: 0.86rem !important;
         background: #FFFFFF !important;
         border: 1px solid #DCE7DD !important;
-        border-radius: 8px !important;
+        border-radius: 6px !important;
     }
     div[data-testid="stDialog"] div[data-testid="stMarkdownContainer"] th {
         background: #17452D !important;
         color: #FFFFFF !important;
-        padding: 10px 14px !important;
+        padding: 6px 10px !important;
         border-bottom: 2px solid #246B42 !important;
         font-weight: 750 !important;
+        font-size: 0.84rem !important;
         text-align: left !important;
     }
     div[data-testid="stDialog"] div[data-testid="stMarkdownContainer"] td {
-        padding: 9px 14px !important;
+        padding: 5px 10px !important;
         border-bottom: 1px solid #EBF1EC !important;
         color: #243D2C !important;
+        font-size: 0.84rem !important;
     }
 
     /* Floating bubble and speech popover must hide when dialog is active */
@@ -1249,7 +1273,7 @@ def open_agrosense_ai_dialog():
         current_session = all_sessions[0]
 
     # --- TWO-COLUMN CHATGPT / GEMINI / CLAUDE LAYOUT ---
-    col_history, col_main = st.columns([1, 2.5])
+    col_history, col_main = st.columns([1, 2.7], gap="small")
 
     pending_query = None
 
@@ -1259,12 +1283,12 @@ def open_agrosense_ai_dialog():
     with col_history:
         # Header with Logo & Pro Badge
         st.markdown("""
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; padding-bottom:8px; border-bottom:2px solid #DCE7DD;">
-            <div style="display:flex; align-items:center; gap:8px;">
-                <span style="font-size:1.4rem;">🤖</span>
-                <span style="font-weight:850; font-size:1.2rem; color:#17452D;">AgroSense</span>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; padding-bottom:6px; border-bottom:1.5px solid #DCE7DD;">
+            <div style="display:flex; align-items:center; gap:6px;">
+                <span style="font-size:1.2rem;">🤖</span>
+                <span style="font-weight:850; font-size:1.1rem; color:#17452D;">AgroSense</span>
             </div>
-            <span style="font-size:0.75rem; background:#E8F5E9; color:#17452D; border:1px solid #A3D9B5; padding:2px 8px; border-radius:12px; font-weight:800;">LPU ACTIVE</span>
+            <span style="font-size:0.70rem; background:#E8F5E9; color:#17452D; border:1px solid #A3D9B5; padding:2px 7px; border-radius:10px; font-weight:800;">LPU ACTIVE</span>
         </div>
         """, unsafe_allow_html=True)
 
@@ -1274,41 +1298,38 @@ def open_agrosense_ai_dialog():
             st.session_state["active_session_id"] = new_id
             st.rerun()
 
-        st.markdown('<p style="font-size:0.78rem; color:#205B38; font-weight:800; text-transform:uppercase; margin-top:14px; margin-bottom:8px; letter-spacing:0.7px;">Recent Briefings</p>', unsafe_allow_html=True)
+        st.markdown('<p style="font-size:0.75rem; color:#205B38; font-weight:800; text-transform:uppercase; margin-top:10px; margin-bottom:6px; letter-spacing:0.6px;">Recent Briefings</p>', unsafe_allow_html=True)
 
-        # List of past chat sessions in a fixed-height scrollable container
-        with st.container(height=260, border=False):
-            if all_sessions:
-                for s in all_sessions[:12]:
-                    is_active = (s["id"] == st.session_state["active_session_id"])
-                    c_title, c_del = st.columns([5, 1])
-                    with c_title:
-                        btn_label = f"💬 {s.get('title', 'Session')[:20]}"
-                        btn_type = "primary" if is_active else "secondary"
-                        if st.button(btn_label, key=f"hist_s_{s['id']}", use_container_width=True, type=btn_type):
-                            st.session_state["active_session_id"] = s["id"]
-                            st.rerun()
-                    with c_del:
-                        if st.button("🗑️", key=f"hist_del_{s['id']}", help="Delete this session"):
-                            chatbot.delete_session(s["id"])
-                            rem = chatbot.load_all_sessions()
-                            if rem:
-                                st.session_state["active_session_id"] = rem[0]["id"]
-                            else:
-                                st.session_state["active_session_id"] = chatbot.create_new_session("New Session")
-                            st.rerun()
-            else:
-                st.caption("No saved conversations yet.")
-
-        st.markdown("---")
+        # List of past chat sessions (clean, naturally fitted, no empty dead space!)
+        if all_sessions:
+            for s in all_sessions[:5]:
+                is_active = (s["id"] == st.session_state["active_session_id"])
+                c_title, c_del = st.columns([5, 1])
+                with c_title:
+                    btn_label = f"💬 {s.get('title', 'Session')[:18]}"
+                    btn_type = "primary" if is_active else "secondary"
+                    if st.button(btn_label, key=f"hist_s_{s['id']}", use_container_width=True, type=btn_type):
+                        st.session_state["active_session_id"] = s["id"]
+                        st.rerun()
+                with c_del:
+                    if st.button("🗑️", key=f"hist_del_{s['id']}", help="Delete this session"):
+                        chatbot.delete_session(s["id"])
+                        rem = chatbot.load_all_sessions()
+                        if rem:
+                            st.session_state["active_session_id"] = rem[0]["id"]
+                        else:
+                            st.session_state["active_session_id"] = chatbot.create_new_session("New Session")
+                        st.rerun()
+        else:
+            st.caption("No saved conversations yet.")
 
         # User Profile Badge at bottom left (matches ChatGPT / Gemini / Claude profile footer)
         st.markdown("""
-        <div style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; background:#F4F8F5; margin-top:10px; border:1px solid #DCE7DD;">
-            <div style="width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg, #17452D 0%, #246B42 100%); color:#FFFFFF; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.95rem;">AK</div>
+        <div style="display:flex; align-items:center; gap:8px; padding:6px 10px; border-radius:8px; background:#F4F8F5; margin-top:10px; margin-bottom:8px; border:1px solid #DCE7DD;">
+            <div style="width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg, #17452D 0%, #246B42 100%); color:#FFFFFF; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.80rem;">AK</div>
             <div>
-                <div style="font-size:0.9rem; font-weight:800; color:#17452D;">Aadish Kotadia</div>
-                <div style="font-size:0.74rem; color:#4B6251; font-weight:600;">AgriSmart Analyst • SEM 3 MBA</div>
+                <div style="font-size:0.80rem; font-weight:800; color:#17452D; line-height:1.2;">Aadish Kotadia</div>
+                <div style="font-size:0.68rem; color:#4B6251; font-weight:600; line-height:1.2;">AgriSmart Analyst • SEM 3 MBA</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -1338,16 +1359,16 @@ def open_agrosense_ai_dialog():
         messages = current_session.get("messages", [])
 
         # =====================================================================
-        # SCROLLABLE MESSAGE CONTAINER (ONLY MESSAGES SCROLL, FIXED 370PX)
+        # SCROLLABLE MESSAGE CONTAINER (ONLY MESSAGES SCROLL, FIXED 450PX)
         # =====================================================================
-        with st.container(height=370, border=False, autoscroll=True):
+        with st.container(height=450, border=False, autoscroll=True):
             # --- If no messages: Hero Greeting & Suggestion Chips (Gemini/Claude style) ---
             if not messages:
                 st.markdown("""
-                <div style="text-align:center; padding: 25px 15px 18px 15px;">
-                    <div style="font-size: 2.5rem; margin-bottom: 6px;">🌾</div>
-                    <h2 style="font-size: 2rem; font-weight: 850; color: #17452D !important; margin: 0;">Where should we start?</h2>
-                    <p style="color: #35483A !important; font-size: 1.05rem; font-weight: 600; margin-top: 6px; margin-bottom: 20px;">Senior Decision Support • 7,920 Historical Records (2014–2024)</p>
+                <div style="text-align:center; padding: 14px 10px 10px 10px;">
+                    <div style="font-size: 2rem; margin-bottom: 4px;">🌾</div>
+                    <h2 style="font-size: 1.6rem; font-weight: 850; color: #17452D !important; margin: 0;">Where should we start?</h2>
+                    <p style="color: #35483A !important; font-size: 0.95rem; font-weight: 600; margin-top: 4px; margin-bottom: 14px;">Senior Decision Support • 7,920 Historical Records (2014–2024)</p>
                 </div>
                 """, unsafe_allow_html=True)
 
