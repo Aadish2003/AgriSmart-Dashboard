@@ -1007,103 +1007,145 @@ def render_cv_section(kind, best_name):
 
 
 # =====================================================
-# 19b. AGROSENSE AI ADVANCED CHATGPT / GEMINI / CLAUDE UI
+# 19b. AGROSENSE AI ENTERPRISE DIALOG MODAL & CHATBOT
 # =====================================================
 
 @st.dialog("🤖 AgroSense AI • Executive Agricultural Assistant", width="large")
 def open_agrosense_ai_dialog():
-    """Renders an advanced ChatGPT/Gemini/Claude split UI with left-side history and mobile view optimization."""
+    """Renders the AgroSense AI Enterprise Assistant with 100% high-contrast, crystal-clear readability."""
 
-    # --- Modern Sleek Dark Theme CSS (ChatGPT / Gemini / Claude Aesthetics) ---
+    # --- High-Contrast Professional Styling CSS ---
     st.markdown("""
     <style>
-    /* Dialog base modal styling */
-    div[data-testid="stDialog"] {
-        background: #171717 !important;
-        border: 1px solid #2E7D32 !important;
-        border-radius: 18px !important;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7) !important;
-        color: #ECECEC !important;
+    /* Dialog base modal styling - Solid opaque white with emerald accent */
+    div[data-testid="stDialog"] [role="dialog"],
+    div[data-testid="stDialog"] > div {
+        background-color: #FFFFFF !important;
+        border: 2px solid #246B42 !important;
+        border-top: 6px solid #17452D !important;
+        border-radius: 16px !important;
+        box-shadow: 0 24px 70px rgba(23, 69, 45, 0.25) !important;
+        color: #17452D !important;
+        opacity: 1 !important;
     }
-    div[data-testid="stDialog"] * {
-        color: #ECECEC !important;
+    div[data-testid="stDialog"] {
+        background-color: rgba(14, 38, 24, 0.65) !important;
+        backdrop-filter: blur(6px) !important;
     }
     
-    /* Left Sidebar Panel (ChatGPT / Gemini / Claude History Panel) */
+    /* Ensure all text inside dialog is dark, crisp, and high-contrast */
+    div[data-testid="stDialog"] h1,
+    div[data-testid="stDialog"] h2,
+    div[data-testid="stDialog"] h3 {
+        color: #17452D !important;
+        font-weight: 800 !important;
+    }
+    div[data-testid="stDialog"] p,
+    div[data-testid="stDialog"] span,
+    div[data-testid="stDialog"] label {
+        color: #2D4734 !important;
+    }
+    
+    /* Left Sidebar History Panel */
     .chat-history-sidebar {
-        background: #1E1E1E;
-        border-right: 1px solid #2A2A2A;
+        background: #F4F8F5;
+        border: 1px solid #DCE7DD;
         border-radius: 12px;
         padding: 14px 12px;
-        height: 100%;
     }
     
-    /* Active session pill */
-    .active-session-pill {
-        background: linear-gradient(135deg, #17452D 0%, #246B42 100%) !important;
-        border: 1px solid #00C853 !important;
-        border-radius: 8px !important;
-        padding: 6px 10px !important;
-        margin-bottom: 6px !important;
-        font-weight: 700 !important;
+    /* Suggestion Query Buttons Styling (Clean, Bold & 100% Readable) */
+    div[data-testid="stDialog"] div[data-testid="stHorizontalBlock"] div[data-testid="stButton"] button {
+        background-color: #FFFFFF !important;
+        border: 1.5px solid #A3D9B5 !important;
+        border-radius: 10px !important;
+        color: #17452D !important;
+        font-size: 0.94rem !important;
+        font-weight: 750 !important;
+        text-align: left !important;
+        padding: 11px 15px !important;
+        min-height: 50px !important;
+        box-shadow: 0 2px 6px rgba(23, 69, 45, 0.05) !important;
+        transition: all 0.22s ease !important;
     }
-    
-    /* History item pill */
-    .history-item-pill {
-        background: #262626 !important;
-        border: 1px solid #333333 !important;
-        border-radius: 8px !important;
-        padding: 6px 10px !important;
-        margin-bottom: 6px !important;
-        color: #B4B4B4 !important;
-        transition: all 0.2s ease !important;
-    }
-    .history-item-pill:hover {
-        background: #2E3A32 !important;
-        border-color: #368254 !important;
-        color: #FFFFFF !important;
-    }
-    
-    /* User message card */
-    div[data-testid="stChatMessage"]:has(div:contains("Agribusiness Strategist")),
-    div[data-testid="stChatMessage"]:first-child {
-        background: #1F2E24 !important;
-        border: 1px solid #2E5C3B !important;
-        border-radius: 14px !important;
-        margin: 10px 0 !important;
-        padding: 12px 16px !important;
-    }
-    
-    /* AI Assistant message card */
-    div[data-testid="stChatMessage"] {
-        background: #1C1C1C !important;
-        border: 1px solid #2A2A2A !important;
-        border-radius: 14px !important;
-        margin: 10px 0 !important;
-        padding: 14px 18px !important;
+    div[data-testid="stDialog"] div[data-testid="stHorizontalBlock"] div[data-testid="stButton"] button:hover {
+        background-color: #E8F5E9 !important;
+        border-color: #246B42 !important;
+        color: #0E2A1B !important;
+        box-shadow: 0 4px 14px rgba(23, 69, 45, 0.15) !important;
+        transform: translateY(-2px) !important;
     }
 
-    /* Modern Table styling in dark theme */
-    div[data-testid="stMarkdownContainer"] table {
+    /* Primary Action Buttons (e.g. + New chat) */
+    div[data-testid="stDialog"] button[kind="primary"],
+    div[data-testid="stDialog"] button:has(p:contains("New chat")) {
+        background-color: #246B42 !important;
+        color: #FFFFFF !important;
+        border: 1.5px solid #246B42 !important;
+        border-radius: 10px !important;
+        font-weight: 800 !important;
+    }
+    div[data-testid="stDialog"] button[kind="primary"]:hover {
+        background-color: #17452D !important;
+        border-color: #17452D !important;
+    }
+    
+    /* User Chat Message Bubble */
+    div[data-testid="stChatMessage"]:has(div:contains("Agribusiness Strategist")),
+    div[data-testid="stChatMessage"]:first-child {
+        background-color: #EBF5EE !important;
+        border: 1px solid #C4E2CC !important;
+        border-radius: 14px !important;
+        margin: 10px 0 !important;
+        padding: 12px 18px !important;
+    }
+    div[data-testid="stChatMessage"]:has(div:contains("Agribusiness Strategist")) * {
+        color: #17452D !important;
+    }
+    
+    /* AI Assistant Chat Message Card */
+    div[data-testid="stChatMessage"] {
+        background-color: #FFFFFF !important;
+        border: 1px solid #DCE7DD !important;
+        border-left: 5px solid #246B42 !important;
+        border-radius: 14px !important;
+        margin: 12px 0 !important;
+        padding: 16px 20px !important;
+        box-shadow: 0 4px 14px rgba(23, 69, 45, 0.06) !important;
+    }
+    div[data-testid="stChatMessage"] * {
+        color: #203528 !important;
+    }
+
+    /* Structured Markdown Tables inside Dialog */
+    div[data-testid="stDialog"] div[data-testid="stMarkdownContainer"] table {
         width: 100% !important;
         border-collapse: collapse !important;
-        margin: 12px 0 !important;
-        font-size: 0.92rem !important;
-        background: #141414 !important;
-        border: 1px solid #2A2A2A !important;
+        margin: 14px 0 !important;
+        font-size: 0.94rem !important;
+        background: #FFFFFF !important;
+        border: 1px solid #DCE7DD !important;
         border-radius: 8px !important;
     }
-    div[data-testid="stMarkdownContainer"] th {
-        background: #1C2D22 !important;
-        color: #69F0AE !important;
-        padding: 10px 12px !important;
+    div[data-testid="stDialog"] div[data-testid="stMarkdownContainer"] th {
+        background: #17452D !important;
+        color: #FFFFFF !important;
+        padding: 10px 14px !important;
         border-bottom: 2px solid #246B42 !important;
+        font-weight: 750 !important;
         text-align: left !important;
     }
-    div[data-testid="stMarkdownContainer"] td {
-        padding: 8px 12px !important;
-        border-bottom: 1px solid #242424 !important;
-        color: #E0E0E0 !important;
+    div[data-testid="stDialog"] div[data-testid="stMarkdownContainer"] td {
+        padding: 9px 14px !important;
+        border-bottom: 1px solid #EBF1EC !important;
+        color: #243D2C !important;
+    }
+
+    /* Floating bubble and speech popover must hide when dialog is active */
+    body:has(div[data-testid="stDialog"]) .agro-speech-popover,
+    body:has(div[data-testid="stDialog"]) div[data-testid="stButton"]:has(button#agro_floating_btn),
+    body:has(div[data-testid="stDialog"]) button#agro_floating_btn {
+        display: none !important;
     }
 
     /* Mobile Responsive Optimizations */
@@ -1114,7 +1156,7 @@ def open_agrosense_ai_dialog():
             min-width: 92vw !important;
             height: 94vh !important;
             max-height: 94vh !important;
-            padding: 10px !important;
+            padding: 8px !important;
             margin: 0 auto !important;
             top: 3vh !important;
         }
@@ -1155,12 +1197,12 @@ def open_agrosense_ai_dialog():
     with col_history:
         # Header with Logo & Pro Badge
         st.markdown("""
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid #282828;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; padding-bottom:8px; border-bottom:2px solid #DCE7DD;">
             <div style="display:flex; align-items:center; gap:8px;">
-                <span style="font-size:1.35rem;">🤖</span>
-                <span style="font-weight:800; font-size:1.15rem; color:#FFFFFF;">AgroSense</span>
+                <span style="font-size:1.4rem;">🤖</span>
+                <span style="font-weight:850; font-size:1.2rem; color:#17452D;">AgroSense</span>
             </div>
-            <span style="font-size:0.75rem; background:#00E676; color:#0e2a1b; padding:2px 8px; border-radius:12px; font-weight:800;">LPU ACTIVE</span>
+            <span style="font-size:0.75rem; background:#E8F5E9; color:#17452D; border:1px solid #A3D9B5; padding:2px 8px; border-radius:12px; font-weight:800;">LPU ACTIVE</span>
         </div>
         """, unsafe_allow_html=True)
 
@@ -1170,7 +1212,7 @@ def open_agrosense_ai_dialog():
             st.session_state["active_session_id"] = new_id
             st.rerun()
 
-        st.markdown('<p style="font-size:0.75rem; color:#8E9F93; font-weight:700; text-transform:uppercase; margin-top:14px; margin-bottom:6px; letter-spacing:0.6px;">Recent Briefings</p>', unsafe_allow_html=True)
+        st.markdown('<p style="font-size:0.78rem; color:#205B38; font-weight:800; text-transform:uppercase; margin-top:14px; margin-bottom:8px; letter-spacing:0.7px;">Recent Briefings</p>', unsafe_allow_html=True)
 
         # List of past chat sessions
         if all_sessions:
@@ -1199,11 +1241,11 @@ def open_agrosense_ai_dialog():
 
         # User Profile Badge at bottom left (matches ChatGPT / Gemini / Claude profile footer)
         st.markdown("""
-        <div style="display:flex; align-items:center; gap:10px; padding:8px 8px; border-radius:10px; background:#212121; margin-top:10px; border:1px solid #2E2E2E;">
-            <div style="width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg, #17452D 0%, #00C853 100%); color:#FFFFFF; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.9rem;">AK</div>
+        <div style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; background:#F4F8F5; margin-top:10px; border:1px solid #DCE7DD;">
+            <div style="width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg, #17452D 0%, #246B42 100%); color:#FFFFFF; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.95rem;">AK</div>
             <div>
-                <div style="font-size:0.88rem; font-weight:700; color:#FFFFFF;">Aadish Kotadia</div>
-                <div style="font-size:0.72rem; color:#A3D9B5;">AgriSmart Analyst • SEM 3 MBA</div>
+                <div style="font-size:0.9rem; font-weight:800; color:#17452D;">Aadish Kotadia</div>
+                <div style="font-size:0.74rem; color:#4B6251; font-weight:600;">AgriSmart Analyst • SEM 3 MBA</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -1235,15 +1277,15 @@ def open_agrosense_ai_dialog():
         # --- If no messages: Hero Greeting & Suggestion Chips (Gemini/Claude style) ---
         if not messages:
             st.markdown("""
-            <div style="text-align:center; padding: 25px 15px 15px 15px;">
-                <div style="font-size: 2.4rem; margin-bottom: 6px;">🌾</div>
-                <h2 style="font-size: 1.85rem; font-weight: 800; color: #FFFFFF !important; margin: 0;">Where should we start?</h2>
-                <p style="color: #A3D9B5; font-size: 0.98rem; margin-top: 4px; margin-bottom: 18px;">Senior Decision Support • 7,920 Historical Records (2014–2024)</p>
+            <div style="text-align:center; padding: 25px 15px 18px 15px;">
+                <div style="font-size: 2.5rem; margin-bottom: 6px;">🌾</div>
+                <h2 style="font-size: 2rem; font-weight: 850; color: #17452D !important; margin: 0;">Where should we start?</h2>
+                <p style="color: #35483A !important; font-size: 1.05rem; font-weight: 600; margin-top: 6px; margin-bottom: 20px;">Senior Decision Support • 7,920 Historical Records (2014–2024)</p>
             </div>
             """, unsafe_allow_html=True)
 
             # Suggestion Chips in 2 Columns (Matching Gemini & Claude screenshots)
-            st.markdown('<p style="font-size:0.78rem; color:#8E9F93; font-weight:700; text-transform:uppercase; margin-bottom:8px; letter-spacing:0.5px;">Suggested Inquiries</p>', unsafe_allow_html=True)
+            st.markdown('<p style="font-size:0.8rem; color:#205B38; font-weight:800; text-transform:uppercase; margin-bottom:10px; letter-spacing:0.7px;">Suggested Inquiries</p>', unsafe_allow_html=True)
             sc1, sc2 = st.columns(2)
             with sc1:
                 if st.button("🌾 Which state produces highest Wheat yield?", key="sug_chip_1", use_container_width=True):
@@ -1325,12 +1367,13 @@ def open_agrosense_ai_dialog():
 def render_floating_chat_bubble():
     """
     Renders an elegant circular floating chat bubble in the bottom-right corner of EVERY page.
-    Features:
-      1. Continuous pulsing/blinking animation.
-      2. Floating popup message right above the bubble:
-         "Any question? Ask me! I am AgroSense AI chatbot" with down-pointing arrow.
-      3. Launches the complete ChatGPT/Gemini/Claude modal dialog when clicked.
+    Automatically hides when the dialog modal is open so it never overlaps or clutters the chat!
     """
+    # If the chat dialog is currently open, do not render the floating bubble or popup!
+    if st.session_state.get("show_chat_dialog", False):
+        open_agrosense_ai_dialog()
+        return
+
     # 1. Floating Bubble CSS with Continuous Blinking Glow and Speech Popover
     st.markdown("""
     <style>
