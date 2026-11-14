@@ -1325,21 +1325,83 @@ def open_agrosense_ai_dialog():
 def render_floating_chat_bubble():
     """
     Renders an elegant circular floating chat bubble in the bottom-right corner of EVERY page.
-    Clicking the bubble launches the complete ChatGPT/Gemini/Claude modal dialog.
+    Features:
+      1. Continuous pulsing/blinking animation.
+      2. Floating popup message right above the bubble:
+         "Any question? Ask me! I am AgroSense AI chatbot" with down-pointing arrow.
+      3. Launches the complete ChatGPT/Gemini/Claude modal dialog when clicked.
     """
-    # 1. Floating Bubble CSS with Mobile View Media Queries
+    # 1. Floating Bubble CSS with Continuous Blinking Glow and Speech Popover
     st.markdown("""
     <style>
-    /* Fixed Floating Chat Bubble at Bottom Right */
-    .agro-bubble-fixed-container {
-        position: fixed;
-        bottom: 26px;
-        right: 28px;
-        z-index: 9999999;
-        display: flex;
-        align-items: center;
-        gap: 8px;
+    /* Continuous Pulsing/Blinking Glow Keyframes */
+    @keyframes agro-bubble-blink-pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.85), 0 8px 25px rgba(23,69,45,0.45);
+            transform: scale(1);
+        }
+        50% {
+            box-shadow: 0 0 0 16px rgba(0, 230, 118, 0), 0 14px 34px rgba(0, 200, 83, 0.65);
+            transform: scale(1.08);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(0, 230, 118, 0), 0 8px 25px rgba(23,69,45,0.45);
+            transform: scale(1);
+        }
     }
+
+    /* Floating Speech Popover Animation */
+    @keyframes agro-popover-bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-6px);
+        }
+    }
+
+    /* Floating Speech Popover directly above the button */
+    .agro-speech-popover {
+        position: fixed !important;
+        bottom: 96px !important;
+        right: 20px !important;
+        z-index: 9999998 !important;
+        background: linear-gradient(135deg, #0e2a1b 0%, #17452D 100%) !important;
+        color: #FFFFFF !important;
+        border: 1.5px solid #00E676 !important;
+        border-radius: 14px !important;
+        padding: 9px 15px !important;
+        font-size: 0.86rem !important;
+        font-weight: 650 !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
+        animation: agro-popover-bounce 2.6s infinite ease-in-out !important;
+        pointer-events: none !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        white-space: nowrap !important;
+    }
+    .agro-speech-popover-badge {
+        background: #00E676 !important;
+        color: #0e2a1b !important;
+        font-size: 0.72rem !important;
+        font-weight: 800 !important;
+        padding: 2px 7px !important;
+        border-radius: 10px !important;
+        text-transform: uppercase !important;
+    }
+    .agro-speech-popover-arrow {
+        position: absolute !important;
+        bottom: -7px !important;
+        right: 28px !important;
+        width: 0 !important;
+        height: 0 !important;
+        border-left: 7px solid transparent !important;
+        border-right: 7px solid transparent !important;
+        border-top: 7px solid #00E676 !important;
+    }
+
+    /* Fixed Floating Chat Bubble Button Styling with Continuous Blink */
     div:has(> .agro-bubble-fixed-container) + div[data-testid="stButton"] button,
     div[data-testid="stButton"]:has(button#agro_floating_btn) button,
     button[key="agro_floating_btn"],
@@ -1348,47 +1410,59 @@ def render_floating_chat_bubble():
         bottom: 26px !important;
         right: 28px !important;
         z-index: 9999999 !important;
-        width: 60px !important;
-        height: 60px !important;
-        min-width: 60px !important;
-        max-width: 60px !important;
-        min-height: 60px !important;
-        max-height: 60px !important;
+        width: 62px !important;
+        height: 62px !important;
+        min-width: 62px !important;
+        max-width: 62px !important;
+        min-height: 62px !important;
+        max-height: 62px !important;
         border-radius: 50% !important;
         background: linear-gradient(135deg, #17452D 0%, #246B42 55%, #00C853 100%) !important;
         color: #FFFFFF !important;
         border: 2.5px solid #69F0AE !important;
-        box-shadow: 0 8px 25px rgba(23,69,45,0.45) !important;
-        font-size: 26px !important;
+        font-size: 28px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
         cursor: pointer !important;
         padding: 0 !important;
         margin: 0 !important;
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        animation: agro-bubble-blink-pulse 2s infinite ease-in-out !important;
+        transition: transform 0.25s ease !important;
     }
     div:has(> .agro-bubble-fixed-container) + div[data-testid="stButton"] button:hover,
     button[key="agro_floating_btn"]:hover {
-        transform: scale(1.12) translateY(-4px) !important;
-        box-shadow: 0 14px 32px rgba(0,200,83,0.6) !important;
+        transform: scale(1.15) !important;
         border-color: #FFFFFF !important;
     }
-    
+
     /* Mobile Responsive Sizing */
     @media (max-width: 768px) {
+        .agro-speech-popover {
+            bottom: 84px !important;
+            right: 14px !important;
+            font-size: 0.76rem !important;
+            padding: 6px 11px !important;
+        }
         div:has(> .agro-bubble-fixed-container) + div[data-testid="stButton"] button,
         button[key="agro_floating_btn"] {
             bottom: 18px !important;
             right: 18px !important;
-            width: 54px !important;
-            height: 54px !important;
-            min-width: 54px !important;
-            min-height: 54px !important;
-            font-size: 24px !important;
+            width: 56px !important;
+            height: 56px !important;
+            min-width: 56px !important;
+            min-height: 56px !important;
+            font-size: 25px !important;
         }
     }
     </style>
+    
+    <!-- Floating Popover Prompt above the Button -->
+    <div class="agro-speech-popover">
+        <span class="agro-speech-popover-badge">AI</span>
+        <span>🌾 <strong>Any question? Ask me!</strong> I am AgroSense AI chatbot</span>
+        <div class="agro-speech-popover-arrow"></div>
+    </div>
     <div class="agro-bubble-fixed-container"></div>
     """, unsafe_allow_html=True)
 
@@ -1396,7 +1470,7 @@ def render_floating_chat_bubble():
     if st.button("💬", key="agro_floating_btn", help="Open AgroSense AI Copilot"):
         st.session_state["show_chat_dialog"] = True
 
-    # 3. JavaScript Helper for universal browser positioning
+    # 3. JavaScript Helper for universal browser positioning & animation
     st.components.v1.html("""
     <script>
     const setupBubble = () => {
@@ -1407,22 +1481,22 @@ def render_floating_chat_bubble():
                 b.style.bottom = '26px';
                 b.style.right = '28px';
                 b.style.zIndex = '9999999';
-                b.style.width = '60px';
-                b.style.height = '60px';
-                b.style.minWidth = '60px';
-                b.style.minHeight = '60px';
+                b.style.width = '62px';
+                b.style.height = '62px';
+                b.style.minWidth = '62px';
+                b.style.minHeight = '62px';
                 b.style.borderRadius = '50%';
                 b.style.background = 'linear-gradient(135deg, #17452D 0%, #246B42 55%, #00C853 100%)';
                 b.style.color = '#FFFFFF';
                 b.style.border = '2.5px solid #69F0AE';
-                b.style.boxShadow = '0 8px 25px rgba(23,69,45,0.45)';
-                b.style.fontSize = '26px';
+                b.style.fontSize = '28px';
                 b.style.display = 'flex';
                 b.style.alignItems = 'center';
                 b.style.justifyContent = 'center';
                 b.style.cursor = 'pointer';
                 b.style.padding = '0';
                 b.style.margin = '0';
+                b.style.animation = 'agro-bubble-blink-pulse 2s infinite ease-in-out';
             }
         });
     };

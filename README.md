@@ -18,7 +18,7 @@
 The application addresses three core analytical workflows:
 1. **How much crop can a farmer expect to harvest?** (Crop Yield Forecasting in tons/hectare)
 2. **What will be the net monetary return for the farm enterprise?** (Farmer Profitability Prediction in INR)
-3. **What strategic decisions should farm management make?** (AgroSense AI: Omnipresent floating circular copilot bubble with interactive Plotly visualizer & out-of-domain guardrails)
+3. **What strategic decisions should farm management make?** (AgroSense AI: Omnipresent floating circular copilot bubble with continuous pulse glow, floating prompt badge, interactive Plotly visualizer & out-of-domain guardrails)
 
 ---
 
@@ -101,24 +101,21 @@ User Query ──► Domain Guardrail ──► Query Vectorizer ──► Conte
 ```
 
 ### ✨ Advanced Architecture & UI/UX Design:
-1. **Floating Circular Chat Bubble (NOT a Dropdown Bar)**:
-   - Replaced all cumbersome dropdown bars with an elegant, small circular floating chat bubble (`💬`) fixed in the bottom-right corner of **every single page**.
-   - Clicking the bubble triggers the full enterprise modal dialog (`@st.dialog`) without disturbing dashboard layouts.
-2. **Clean 6-Page Navigation**:
-   - The left sidebar Navigation radio focuses strictly on the 6 core analytical dashboards (Dashboard Overview, Crop Analysis, Data Explorer, Profitability Model Evaluation, Crop Yield Forecasting, and Farmer Profitability Prediction).
-3. **Out-of-Domain Guardrail (Zero Hallucination)**:
-   - If an off-topic or random question is asked (e.g., sports, coding, general trivia), AgroSense AI politely declines and provides suggested agricultural queries, alongside a macro dataset benchmark chart.
-4. **Guaranteed Interactive Plotly Graph on EVERY Response**:
-   - Every response dynamically includes an executive-grade Plotly chart (state yield rankings, crop profitability spreads, 10-year trajectories, irrigation efficiency, price benchmarks, or ML feature importance).
-5. **Animated Thinking Status Indicator**:
-   - Displays real-time operational feedback (`🤖 AgroSense AI is thinking... Analyzing 7,920 records & synthesizing executive solution...`) during processing.
-6. **Multi-Session Chat History Archive (Read, Resume, Delete & Export)**:
-   - **Read Past Briefings**: Inspect past session transcripts with message counts and creation timestamps.
-   - **Resume Past Thread**: Load any previous investigation into the active chat window.
-   - **Individual Deletion**: 🗑️ Delete specific threads.
-   - **Export as Markdown (.md)**: 📥 Instant download of formatted executive briefing reports.
-7. **ML Prediction & Forecasting Advisory**:
-   - Deep explanations of Random Forest and Gradient Boosting dynamics ($R^2 \approx 0.80$), input cost sensitivities, and feature dominance (Area $r=0.69$, Yield $r=0.55$).
+1. **Continuous Blinking Floating Bubble & Speech Badge**:
+   - Small circular action bubble fixed at `bottom: 26px; right: 28px;` with continuous glowing pulse animation (`@keyframes agro-bubble-blink-pulse`).
+   - Floating speech bubble popover sits directly above the button with a down-pointing arrow:
+     `🌾 Any question? Ask me! I am AgroSense AI chatbot`
+2. **Two-Column Split Layout (ChatGPT / Gemini / Claude Style)**:
+   - **Left Panel**: Dedicated Chat History Section (`➕ New chat`, recent threads with active highlights, individual thread deletion, user profile card, export).
+   - **Right Panel**: Conversational Canvas with centered hero greeting (`Where should we start?`), suggestion prompt pills, and interactive Plotly charts.
+3. **Clean 6-Page Navigation**:
+   - The left sidebar Navigation radio focuses strictly on the 6 core analytical dashboards.
+4. **Mobile View Responsiveness**:
+   - Adaptive sizing for mobile devices (`max-width: 768px`) with fluid full-width modal expansion and touch-optimized floating bubble.
+5. **Out-of-Domain Guardrail (Zero Hallucination)**:
+   - Off-topic questions are politely redirected with valid agricultural queries and accompanied by a macro benchmark chart.
+6. **Guaranteed Interactive Plotly Graph on EVERY Response**:
+   - Every response includes an Executive Summary, a Quantitative Benchmark Table, Management-Level Solutions, and a dynamically generated interactive Plotly chart.
 
 ---
 
@@ -182,12 +179,12 @@ Open your browser at `http://localhost:8501`.
 
 | Page | Description | Key Features |
 |---|---|---|
-| **Dashboard Overview** | Executive summary of national agricultural metrics. | KPI metric cards, regional yield breakdowns, crop distribution charts, **Floating AI Bubble**. |
-| **Crop Analysis** | Comparative analysis across 8 major crop varieties. | Yield vs. input correlations, price-yield scatter plots, soil suitability charts, **Floating AI Bubble**. |
-| **Data Explorer** | Interactive dataset browser with multi-dimensional filtering. | State/Crop/Season filters, summary statistics, filtered CSV export, **Floating AI Bubble**. |
-| **Profitability Model Evaluation** | Rigorous evaluation of 9 ML algorithms for farm profit. | Holdout metrics ($R^2$, MAE, RMSE), TimeSeries CV, residual distribution plots, **Floating AI Bubble**. |
-| **Crop Yield Forecasting** | ML-driven expected yield prediction engine. | Farm parameter input form, Random Forest inference, sensitivity curves, regional benchmark charts, **Floating AI Bubble**. |
-| **Farmer Profitability Prediction** | End-to-end farm enterprise profitability forecasting. | Scale & input cost analysis, sensitivity curves ($\pm 20\%$), revenue/cost structure breakdown, **Floating AI Bubble**. |
+| **Dashboard Overview** | Executive summary of national agricultural metrics. | KPI metric cards, regional yield breakdowns, crop distribution charts, **Pulsing AI Bubble**. |
+| **Crop Analysis** | Comparative analysis across 8 major crop varieties. | Yield vs. input correlations, price-yield scatter plots, soil suitability charts, **Pulsing AI Bubble**. |
+| **Data Explorer** | Interactive dataset browser with multi-dimensional filtering. | State/Crop/Season filters, summary statistics, filtered CSV export, **Pulsing AI Bubble**. |
+| **Profitability Model Evaluation** | Rigorous evaluation of 9 ML algorithms for farm profit. | Holdout metrics ($R^2$, MAE, RMSE), TimeSeries CV, residual distribution plots, **Pulsing AI Bubble**. |
+| **Crop Yield Forecasting** | ML-driven expected yield prediction engine. | Farm parameter input form, Random Forest inference, sensitivity curves, regional benchmark charts, **Pulsing AI Bubble**. |
+| **Farmer Profitability Prediction** | End-to-end farm enterprise profitability forecasting. | Scale & input cost analysis, sensitivity curves ($\pm 20\%$), revenue/cost structure breakdown, **Pulsing AI Bubble**. |
 
 ---
 
