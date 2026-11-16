@@ -344,7 +344,15 @@ def chat(user_query: str, chat_history: list[dict]) -> tuple[str, go.Figure]:
 
     return answer, fig
 
+_CHART_CACHE: dict[str, go.Figure] = {}
+
 def generate_dynamic_chart(query: str) -> go.Figure:
+    k = str(query).lower().strip()
+    if k not in _CHART_CACHE:
+        _CHART_CACHE[k] = _create_chart_internal(query)
+    return _CHART_CACHE[k]
+
+def _create_chart_internal(query: str) -> go.Figure:
     """
     Generates an executive-grade Plotly chart.
     GUARANTEED to return a valid Plotly Figure for ANY query!

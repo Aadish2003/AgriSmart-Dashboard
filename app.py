@@ -41,6 +41,8 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
+import chatbot
+
 
 # =====================================================
 # 1. PAGE CONFIGURATION
@@ -1216,7 +1218,10 @@ def render_svc_section():
 # 19b. AGROSENSE AI ENTERPRISE DIALOG MODAL & CHATBOT
 # =====================================================
 
-@st.dialog("🤖 AgroSense AI • Executive Agricultural Assistant", width="large")
+def handle_dialog_dismiss():
+    st.session_state["show_chat_dialog"] = False
+
+@st.dialog("🤖 AgroSense AI • Executive Agricultural Assistant", width="large", on_dismiss=handle_dialog_dismiss)
 def open_agrosense_ai_dialog():
     """Renders the AgroSense AI Enterprise Assistant with 100% high-contrast, crystal-clear readability."""
 
@@ -1239,9 +1244,9 @@ def open_agrosense_ai_dialog():
         color: #17452D !important;
         opacity: 1 !important;
         max-height: 90vh !important;
-        overflow-y: auto !important; /* Graceful scroll fallback on tiny screens */
+        overflow-y: hidden !important; /* Modal itself stays fixed; only message box scrolls */
         overflow-x: hidden !important;
-        padding: 14px 18px !important;
+        padding: 12px 18px !important;
     }
     div[data-testid="stDialog"] [role="dialog"] > div {
         overflow-y: visible !important;
@@ -1460,8 +1465,6 @@ def open_agrosense_ai_dialog():
     </style>
     """, unsafe_allow_html=True)
 
-    import chatbot
-
     # Initialize active session
     if "active_session_id" not in st.session_state:
         existing = chatbot.load_all_sessions()
@@ -1565,21 +1568,21 @@ def open_agrosense_ai_dialog():
         messages = current_session.get("messages", [])
 
         # =====================================================================
-        # SCROLLABLE MESSAGE CONTAINER (ONLY MESSAGES SCROLL, FIXED 450PX)
+        # SCROLLABLE MESSAGE CONTAINER (ONLY MESSAGES SCROLL, FIXED 390PX)
         # =====================================================================
-        with st.container(height=450, border=False, autoscroll=True):
+        with st.container(height=390, border=False, autoscroll=True):
             # --- If no messages: Hero Greeting & Suggestion Chips (Gemini/Claude style) ---
             if not messages:
                 st.markdown("""
-                <div style="text-align:center; padding: 14px 10px 10px 10px;">
-                    <div style="font-size: 2rem; margin-bottom: 4px;">🌾</div>
-                    <h2 style="font-size: 1.6rem; font-weight: 850; color: #17452D !important; margin: 0;">Where should we start?</h2>
-                    <p style="color: #35483A !important; font-size: 0.95rem; font-weight: 600; margin-top: 4px; margin-bottom: 14px;">Senior Decision Support • 7,920 Historical Records (2014–2024)</p>
+                <div style="text-align:center; padding: 4px 10px 4px 10px;">
+                    <div style="font-size: 1.8rem; margin-bottom: 2px;">🌾</div>
+                    <h2 style="font-size: 1.4rem; font-weight: 850; color: #17452D !important; margin: 0;">Where should we start?</h2>
+                    <p style="color: #35483A !important; font-size: 0.88rem; font-weight: 600; margin-top: 2px; margin-bottom: 8px;">Senior Decision Support • 7,920 Historical Records (2014–2024)</p>
                 </div>
                 """, unsafe_allow_html=True)
 
                 # Suggestion Chips in 2 Columns (Matching Gemini & Claude screenshots)
-                st.markdown('<p style="font-size:0.8rem; color:#205B38; font-weight:800; text-transform:uppercase; margin-bottom:10px; letter-spacing:0.7px;">Suggested Inquiries</p>', unsafe_allow_html=True)
+                st.markdown('<p style="font-size:0.75rem; color:#205B38; font-weight:800; text-transform:uppercase; margin-bottom:6px; letter-spacing:0.6px;">Suggested Inquiries</p>', unsafe_allow_html=True)
                 sc1, sc2 = st.columns(2)
                 with sc1:
                     if st.button("🌾 Which state produces highest Wheat yield?", key="sug_chip_1", use_container_width=True):
@@ -1666,10 +1669,11 @@ def render_floating_chat_bubble():
     Renders an elegant circular floating chat bubble in the bottom-right corner of EVERY page.
     Automatically hides when the dialog modal is open so it never overlaps or clutters the chat!
     """
-    # If the chat dialog is currently open, do not render the floating bubble or popup!
-    if st.session_state.get("show_chat_dialog", False):
-        open_agrosense_ai_dialog()
-        return
+    # Track page to safely reset show_chat_dialog when switching between pages
+    active_page = st.session_state.get("_active_page_name")
+    if active_page != page:
+        st.session_state["_active_page_name"] = page
+        st.session_state["show_chat_dialog"] = False
 
     # 1. Floating Bubble CSS with Continuous Blinking Glow and Speech Popover
     st.markdown("""
@@ -1742,9 +1746,11 @@ def render_floating_chat_bubble():
     }
 
     /* Fixed Floating Chat Bubble Button Styling with Continuous Blink */
+    div[data-testid="stElementContainer"]:has(.agro-bubble-fixed-container) + div[data-testid="stElementContainer"] button,
     div:has(> .agro-bubble-fixed-container) + div[data-testid="stButton"] button,
     div[data-testid="stButton"]:has(button#agro_floating_btn) button,
     button[key="agro_floating_btn"],
+    button:has(p:contains("💬")),
     div.stButton > button#agro_floating_btn {
         position: fixed !important;
         bottom: 26px !important;
@@ -1771,9 +1777,21 @@ def render_floating_chat_bubble():
         transition: transform 0.25s ease !important;
     }
     div:has(> .agro-bubble-fixed-container) + div[data-testid="stButton"] button:hover,
-    button[key="agro_floating_btn"]:hover {
+    button[key="agro_floating_btn"]:hover,
+    button:has(p:contains("💬")):hover {
         transform: scale(1.15) !important;
         border-color: #FFFFFF !important;
+    }
+
+    /* Floating bubble and speech popover must hide ONLY when dialog is active on screen */
+    body:has(div[data-testid="stDialog"]) .agro-speech-popover,
+    body:has(div[data-testid="stDialog"]) div:has(> .agro-bubble-fixed-container) + div[data-testid="stButton"] button,
+    body:has(div[data-testid="stDialog"]) div[data-testid="stElementContainer"]:has(.agro-bubble-fixed-container) + div[data-testid="stElementContainer"] button,
+    body:has(div[data-testid="stDialog"]) button[key="agro_floating_btn"],
+    body:has(div[data-testid="stDialog"]) button:has(p:contains("💬")) {
+        display: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
     }
 
     /* Mobile Responsive Sizing */
@@ -1797,7 +1815,7 @@ def render_floating_chat_bubble():
     }
     </style>
     
-    <!-- Floating Popover Prompt above the Button -->
+    <!-- Floating Popover Prompt above the Button (Available on EVERY Page) -->
     <div class="agro-speech-popover">
         <span class="agro-speech-popover-badge">AI</span>
         <span>🌾 <strong>Any question? Ask me!</strong> I am AgroSense AI chatbot</span>
@@ -1807,46 +1825,58 @@ def render_floating_chat_bubble():
     """, unsafe_allow_html=True)
 
     # 2. Floating Button (Small Circular Bubble)
-    if st.button("💬", key="agro_floating_btn", help="Open AgroSense AI Copilot"):
+    clicked = st.button("💬", key="agro_floating_btn", help="Open AgroSense AI Copilot")
+    if clicked:
         st.session_state["show_chat_dialog"] = True
 
-    # 3. JavaScript Helper for universal browser positioning & animation
+    # 3. JavaScript Helper for universal browser positioning & animation with MutationObserver
     st.components.v1.html("""
     <script>
-    const setupBubble = () => {
-        const btns = window.parent.document.querySelectorAll('button');
-        btns.forEach(b => {
-            if (b.innerText.trim() === '💬' || b.getAttribute('aria-label') === 'agro_floating_btn') {
-                b.style.position = 'fixed';
-                b.style.bottom = '26px';
-                b.style.right = '28px';
-                b.style.zIndex = '9999999';
-                b.style.width = '62px';
-                b.style.height = '62px';
-                b.style.minWidth = '62px';
-                b.style.minHeight = '62px';
-                b.style.borderRadius = '50%';
-                b.style.background = 'linear-gradient(135deg, #17452D 0%, #246B42 55%, #00C853 100%)';
-                b.style.color = '#FFFFFF';
-                b.style.border = '2.5px solid #69F0AE';
-                b.style.fontSize = '28px';
-                b.style.display = 'flex';
-                b.style.alignItems = 'center';
-                b.style.justifyContent = 'center';
-                b.style.cursor = 'pointer';
-                b.style.padding = '0';
-                b.style.margin = '0';
-                b.style.animation = 'agro-bubble-blink-pulse 2s infinite ease-in-out';
-            }
-        });
-    };
-    setTimeout(setupBubble, 150);
-    setTimeout(setupBubble, 600);
+    (function() {
+        function setupBubble() {
+            try {
+                const doc = window.parent.document;
+                const btns = doc.querySelectorAll('button');
+                btns.forEach(b => {
+                    if (b.innerText.trim() === '💬' || b.textContent.includes('💬') || b.getAttribute('aria-label') === 'agro_floating_btn') {
+                        b.style.position = 'fixed';
+                        b.style.bottom = '26px';
+                        b.style.right = '28px';
+                        b.style.zIndex = '9999999';
+                        b.style.width = '62px';
+                        b.style.height = '62px';
+                        b.style.minWidth = '62px';
+                        b.style.minHeight = '62px';
+                        b.style.borderRadius = '50%';
+                        b.style.background = 'linear-gradient(135deg, #17452D 0%, #246B42 55%, #00C853 100%)';
+                        b.style.color = '#FFFFFF';
+                        b.style.border = '2.5px solid #69F0AE';
+                        b.style.fontSize = '28px';
+                        b.style.display = 'flex';
+                        b.style.alignItems = 'center';
+                        b.style.justifyContent = 'center';
+                        b.style.cursor = 'pointer';
+                        b.style.padding = '0';
+                        b.style.margin = '0';
+                        b.style.animation = 'agro-bubble-blink-pulse 2s infinite ease-in-out';
+                    }
+                });
+            } catch(e) {}
+        }
+        setupBubble();
+        setTimeout(setupBubble, 100);
+        setTimeout(setupBubble, 400);
+        setTimeout(setupBubble, 1000);
+        try {
+            const observer = new MutationObserver(setupBubble);
+            observer.observe(window.parent.document.body, { childList: true, subtree: true });
+        } catch(e) {}
+    })();
     </script>
     """, height=0, width=0)
 
-    # 4. Open Dialog if active
-    if st.session_state.get("show_chat_dialog", False):
+    # 4. Open Dialog if clicked or active
+    if clicked or st.session_state.get("show_chat_dialog", False):
         open_agrosense_ai_dialog()
 
 
