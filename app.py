@@ -175,7 +175,7 @@ PAGES = [
     "Dashboard Overview",
     "Crop Analysis",
     "Data Explorer",
-    "Profitability Model Evaluation",
+    "Machine Learning Model Evaluation",
     "Crop Yield Forecasting",
     "Farmer Profitability Prediction",
 ]
@@ -2037,10 +2037,10 @@ elif page == "Data Explorer":
 
 
 # =====================================================
-# 16. PAGE: PROFITABILITY MODEL EVALUATION  (notebook: profit modelling)
+# 16. PAGE: MACHINE LEARNING MODEL EVALUATION  (notebook: profit & yield modelling)
 # =====================================================
 
-elif page == "Profitability Model Evaluation":
+elif page.strip() in ["Machine Learning Model Evaluation", "Profitability Model Evaluation"]:
 
     st.header("🔬 Machine Learning Model Evaluation & Benchmarking")
     st.write(

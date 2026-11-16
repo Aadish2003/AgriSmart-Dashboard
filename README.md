@@ -182,7 +182,7 @@ Open your browser at `http://localhost:8501`.
 | **Dashboard Overview** | Executive summary of national agricultural metrics. | KPI metric cards, regional yield breakdowns, crop distribution charts, **Pulsing AI Bubble**. |
 | **Crop Analysis** | Comparative analysis across 8 major crop varieties. | Yield vs. input correlations, price-yield scatter plots, soil suitability charts, **Pulsing AI Bubble**. |
 | **Data Explorer** | Interactive dataset browser with multi-dimensional filtering. | State/Crop/Season filters, summary statistics, filtered CSV export, **Pulsing AI Bubble**. |
-| **Profitability Model Evaluation** | Rigorous evaluation of 9 ML algorithms for farm profit. | Holdout metrics ($R^2$, MAE, RMSE), TimeSeries CV, residual distribution plots, **Pulsing AI Bubble**. |
+| **Machine Learning Model Evaluation** | Rigorous evaluation of 9 ML regressors for profit & yield, plus SVC classification. | Holdout metrics ($R^2 > 80\%$, MAE, RMSE, Accuracy%, F1), TimeSeries CV, residual distribution plots, **Pulsing AI Bubble**. |
 | **Crop Yield Forecasting** | ML-driven expected yield prediction engine. | Farm parameter input form, Random Forest inference, sensitivity curves, regional benchmark charts, **Pulsing AI Bubble**. |
 | **Farmer Profitability Prediction** | End-to-end farm enterprise profitability forecasting. | Scale & input cost analysis, sensitivity curves ($\pm 20\%$), revenue/cost structure breakdown, **Pulsing AI Bubble**. |
 
