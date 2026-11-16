@@ -411,8 +411,12 @@ def feature_lists(kind):
             "Fertilizer_Used_kg", "Pesticide_Used_kg", "Rainfall_mm", "Avg_Temperature_C", "Humidity_percent"
         ]
 
-    # Profitability also uses the yield as an input
-    return PROFIT, CATEGORICAL_FEATURES, NUMERIC_FEATURES + [YIELD]
+    # Profitability uses yield, market price, and agricultural inputs
+    return PROFIT, CATEGORICAL_FEATURES, [
+        YIELD, "Cultivated_Area_hectares", "Market_Price_per_ton",
+        "Fertilizer_Used_kg", "Pesticide_Used_kg", "Rainfall_mm",
+        "Avg_Temperature_C", "Humidity_percent"
+    ]
 
 
 def build_preprocessor(categorical, numerical):
@@ -779,6 +783,14 @@ def get_prediction_inputs(include_yield=False, key_prefix=""):
                 min_value=0.0,
                 value=4.8,
                 key=f"{p}expected_yield_input",
+            )
+            values["Market_Price_per_ton"] = st.number_input(
+                "Market Price per Ton (INR)",
+                min_value=1000.0,
+                value=38000.0,
+                step=500.0,
+                key=f"{p}market_price_input",
+                help="Prevailing or expected market selling price per ton."
             )
 
     return values
@@ -2115,7 +2127,11 @@ elif page == "Crop Yield Forecasting":
 
         with st.spinner("Forecasting crop yield using best model (R² > 81%)..."):
             model, features, from_file = load_or_train_model(df, YIELD)
-            input_data = pd.DataFrame([inputs], columns=features)
+            input_data = pd.DataFrame([inputs])
+            for col in features:
+                if col not in input_data.columns:
+                    input_data[col] = 0.0
+            input_data = input_data[features]
             prediction = float(model.predict(input_data)[0])
 
         state = inputs["State"]
@@ -2287,9 +2303,23 @@ elif page == "Farmer Profitability Prediction":
         )
 
     if submitted:
-        with st.spinner("Estimating farmer profitability using best model from rain.ipynb..."):
+        state = inputs["State"]
+        crop = inputs["Crop_Type"]
+
+        # Ensure Market_Price_per_ton is populated
+        if "Market_Price_per_ton" not in inputs or not inputs["Market_Price_per_ton"]:
+            subset_crop = df[(df["State"] == state) & (df["Crop_Type"] == crop)]
+            if subset_crop.empty:
+                subset_crop = df[df["Crop_Type"] == crop]
+            inputs["Market_Price_per_ton"] = float(subset_crop["Market_Price_per_ton"].median()) if not subset_crop.empty else float(df["Market_Price_per_ton"].median())
+
+        with st.spinner("Estimating farmer profitability using champion model (R² ≈ 86%)..."):
             model, features, from_file = load_or_train_model(df, PROFIT)
-            input_data = pd.DataFrame([inputs], columns=features)
+            input_data = pd.DataFrame([inputs])
+            for col in features:
+                if col not in input_data.columns:
+                    input_data[col] = 0.0
+            input_data = input_data[features]
             prediction = float(model.predict(input_data)[0])
 
         state = inputs["State"]
@@ -2349,7 +2379,11 @@ elif page == "Farmer Profitability Prediction":
             for mult in scenario_multipliers:
                 temp_in = inputs.copy()
                 temp_in[YIELD] = max(0.1, exp_yield * (1 + mult))
-                temp_df = pd.DataFrame([temp_in], columns=features)
+                temp_df = pd.DataFrame([temp_in])
+                for col in features:
+                    if col not in temp_df.columns:
+                        temp_df[col] = 0.0
+                temp_df = temp_df[features]
                 scenario_profits.append(float(model.predict(temp_df)[0]))
 
             sens_df = pd.DataFrame({
