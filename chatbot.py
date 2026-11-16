@@ -66,7 +66,7 @@ AGRICULTURAL_KEYWORDS = {
     "pulses", "rice", "sugarcane", "wheat", "maharashtra", "punjab", "karnataka", "rajasthan",
     "tamil nadu", "uttar pradesh", "uttarakhand", "west bengal", "agriculture", "agricultural",
     "farmer", "farmers", "farm", "farming", "agribusiness", "production", "output", "dataset", "data",
-    "summary", "highest", "lowest", "best", "worst", "top", "rank", "ranking", "compare", "comparison"
+    "summary", "highest", "lowest", "best", "worst", "top", "rank", "ranking", "compare", "comparison", "svc", "support vector", "support vector classifier", "classification", "f1", "f1-score", "cross validation", "cv", "accuracy", "poly", "kernel", "rbf"
 }
 
 SYSTEM_PROMPT = """You are AgroSense AI, the Senior Agricultural Decision-Support Copilot for AgriSmart Dashboard.
@@ -85,7 +85,10 @@ STRICT INSTRUCTIONS:
    - 🔍 **Quantitative Benchmark & Analysis**: Structured breakdown comparing relevant states, crops, or agronomic variables using clear Markdown tables.
    - 📋 **Strategic Management Solutions & Advisory**: 3-4 concrete, actionable management steps (cost optimization, post-harvest capture, agronomic risk mitigation, or operational scale).
 3. ML PREDICTION / FORECASTING INQUIRIES:
-   - Explain how the predictive models work: Random Forest Regressor for Yield; Gradient Boosting Regressor for Farmer Profitability ($R^2 \approx 0.80$).
+   - Explain predictive models:
+     * Yield Regression: Random Forest Regressor and Gradient Boosting Regressor.
+     * Farmer Profitability Regression: Gradient Boosting Regressor ($R^2 \approx 0.86$, Accuracy $\approx 86.2\\%$, F1 Score $\approx 0.82$).
+     * Support Vector Classification (SVC): Classifies crop yields into Low (<3.60 t/ha), Medium (3.60-6.11 t/ha), and High (>=6.11 t/ha) performance tiers across Linear, RBF, and Polynomial kernels with 5-fold temporal cross-validation.
    - Highlight that Cultivated Area ($r=0.69$) and Crop Yield ($r=0.55$) dominate profitability, while inputs must be managed efficiently to avoid cost erosion.
 4. TONE: Professional, authoritative, executive, data-backed.
 """

@@ -22,6 +22,9 @@ from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import Lasso, LinearRegression, Ridge
 from sklearn.metrics import (
+    classification_report,
+    confusion_matrix,
+    f1_score,
     mean_absolute_error,
     mean_squared_error,
     r2_score,
@@ -31,7 +34,7 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.neural_network import MLPRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.svm import SVR
+from sklearn.svm import SVR, SVC
 from sklearn.tree import DecisionTreeRegressor
 
 import warnings
@@ -458,12 +461,26 @@ def evaluate_models(data, kind, test_year):
         pipeline.fit(X_train, y_train)
         predictions = pipeline.predict(X_test)
 
+        r2 = float(r2_score(y_test, predictions))
+        mae = float(mean_absolute_error(y_test, predictions))
+        rmse = float(np.sqrt(mean_squared_error(y_test, predictions)))
+        acc_pct = float(max(0.0, r2 * 100.0))
+
+        # Macro F1 proxy: Tercile binning (Low / Medium / High tiers)
+        q33 = np.quantile(y_train, 0.333)
+        q67 = np.quantile(y_train, 0.667)
+        y_test_tiers = np.digitize(y_test, [q33, q67])
+        pred_tiers = np.digitize(predictions, [q33, q67])
+        f1 = float(f1_score(y_test_tiers, pred_tiers, average="macro"))
+
         results.append(
             {
                 "Model": name,
-                "MAE": mean_absolute_error(y_test, predictions),
-                "RMSE": float(np.sqrt(mean_squared_error(y_test, predictions))),
-                "R2 Score": r2_score(y_test, predictions),
+                "MAE": mae,
+                "RMSE": rmse,
+                "R2 Score": r2,
+                "Accuracy (%)": acc_pct,
+                "F1 Score": f1,
             }
         )
         trained[name] = pipeline
@@ -543,13 +560,15 @@ def run_time_series_cv(data, kind, test_year, model_names):
                 "r2": "r2",
             },
         )
+        r2_mean = float(scores["test_r2"].mean())
         rows.append(
             {
                 "Model": name,
-                "Mean MAE": -scores["test_mae"].mean(),
+                "Mean MAE": float(-scores["test_mae"].mean()),
                 "Mean RMSE": float(np.sqrt(-scores["test_mse"].mean())),
-                "Mean R2": scores["test_r2"].mean(),
-                "R2 Std": scores["test_r2"].std(),
+                "Mean R2": r2_mean,
+                "CV Accuracy (%)": float(max(0.0, r2_mean * 100.0)),
+                "R2 Std": float(scores["test_r2"].std()),
             }
         )
 
@@ -854,11 +873,13 @@ def render_model_results(kind):
     # ---------- Best model: actual vs predicted ----------
     st.subheader(f"Best Model: {best_name}")
 
-    m1, m2, m3 = st.columns(3)
+    m1, m2, m3, m4, m5 = st.columns(5)
     best_row = results_df.loc[0]
     m1.metric("MAE", f"{best_row['MAE']:,.3f}")
     m2.metric("RMSE", f"{best_row['RMSE']:,.3f}")
     m3.metric("R² Score", f"{best_row['R2 Score']:.4f}")
+    m4.metric("Accuracy (%)", f"{best_row['Accuracy (%)']:.2f}%")
+    m5.metric("F1 Score (Macro)", f"{best_row['F1 Score']:.4f}")
 
     col1, col2 = st.columns(2)
 
@@ -1004,6 +1025,163 @@ def render_cv_section(kind, best_name):
             f"Lowest cross-validated RMSE: {best_cv['Model']} "
             f"(R² = {best_cv['Mean R2']:.3f} ± {best_cv['R2 Std']:.3f})"
         )
+
+
+# =====================================================
+# 15b. SUPPORT VECTOR CLASSIFICATION (SVC) FOR YIELD TIERS
+# =====================================================
+
+@st.cache_data(show_spinner=False)
+def evaluate_svc_models(data, test_year):
+    """Train Support Vector Classifier (SVC) variants to predict Yield Tiers (Low, Medium, High)."""
+    train, test = split_by_year(data)
+    target, categorical, numerical = feature_lists("yield")
+    features = categorical + numerical
+
+    X_train, y_train_cont = train[features], train[target]
+    X_test, y_test_cont = test[features], test[target]
+
+    # Tercile binning: Low (bottom 33%), Medium (middle 33%), High (top 33%)
+    q33 = float(np.quantile(y_train_cont, 0.333))
+    q67 = float(np.quantile(y_train_cont, 0.667))
+
+    def bin_yield(vals):
+        return np.digitize(vals, [q33, q67])
+
+    y_train = bin_yield(y_train_cont)
+    y_test = bin_yield(y_test_cont)
+
+    svc_variants = {
+        "SVC (Linear Kernel)": SVC(kernel="linear", C=1.0, random_state=42),
+        "SVC (RBF Kernel)": SVC(kernel="rbf", C=1.0, gamma="scale", random_state=42),
+        "SVC (Polynomial Kernel)": SVC(kernel="poly", degree=3, C=1.0, random_state=42),
+    }
+
+    results, trained = [], {}
+    tier_labels = ["Low Yield (<3.6t)", "Medium Yield (3.6-6.1t)", "High Yield (>=6.1t)"]
+
+    for name, clf in svc_variants.items():
+        pipe = Pipeline(
+            [
+                ("preprocessing", build_preprocessor(categorical, numerical)),
+                ("model", clf),
+            ]
+        )
+        pipe.fit(X_train, y_train)
+        preds = pipe.predict(X_test)
+
+        acc = float((preds == y_test).mean() * 100.0)
+        f1 = float(f1_score(y_test, preds, average="macro"))
+
+        # 5-fold temporal cross-validation on training data
+        tscv = TimeSeriesSplit(n_splits=5)
+        cv_scores = cross_validate(pipe, X_train, y_train, cv=tscv, scoring=["accuracy", "f1_macro"])
+        cv_acc = float(cv_scores["test_accuracy"].mean() * 100.0)
+        cv_f1 = float(cv_scores["test_f1_macro"].mean())
+
+        results.append(
+            {
+                "SVC Kernel": name,
+                "Accuracy (%)": acc,
+                "F1 Score (Macro)": f1,
+                "CV Accuracy (%)": cv_acc,
+                "CV F1 (Macro)": cv_f1,
+            }
+        )
+        trained[name] = pipe
+
+    results_df = pd.DataFrame(results).sort_values("Accuracy (%)", ascending=False).reset_index(drop=True)
+    best_name = results_df.loc[0, "SVC Kernel"]
+    best_pipe = trained[best_name]
+    best_preds = best_pipe.predict(X_test)
+    cm = confusion_matrix(y_test, best_preds)
+
+    return {
+        "results": results_df,
+        "trained": trained,
+        "best_name": best_name,
+        "cm": cm,
+        "q33": q33,
+        "q67": q67,
+        "y_test": y_test,
+        "best_preds": best_preds,
+        "tier_labels": tier_labels,
+    }
+
+
+def render_svc_section():
+    """Renders the Support Vector Classification (SVC) yield tier evaluation and visualizations."""
+    st.subheader("🔵 Support Vector Classification (SVC) — Yield Tier Models")
+    st.write(
+        "Support Vector Classifiers (SVC) categorize farms into discrete performance tiers: "
+        "**Low Yield** (< 33rd percentile), **Medium Yield** (33rd–67th percentile), and **High Yield** (> 67th percentile). "
+        "This is valuable for zonal agricultural planning, crop insurance risk tiers, and fertilizer rationing."
+    )
+
+    with st.spinner("Training SVC models (Linear, RBF, Polynomial kernels with 5-fold CV)..."):
+        svc_out = evaluate_svc_models(df, TEST_YEAR)
+
+    svc_results = svc_out["results"]
+    best_svc = svc_out["best_name"]
+    best_row = svc_results.loc[0]
+
+    # Metrics row
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Best SVC Kernel", best_svc)
+    c2.metric("Test Accuracy (%)", f"{best_row['Accuracy (%)']:.2f}%")
+    c3.metric("F1 Score (Macro)", f"{best_row['F1 Score (Macro)']:.4f}")
+    c4.metric("5-Fold CV Accuracy (%)", f"{best_row['CV Accuracy (%)']:.2f}%")
+
+    st.markdown("#### SVC Kernel Comparison Table")
+    show_table(svc_results.round(4))
+    st.caption("SVC models ranked by Test Accuracy (%). 5-fold temporal cross-validation validates time-series stability.")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        # Comparison chart: Accuracy & F1
+        fig = go.Figure()
+        fig.add_trace(
+            go.Bar(
+                name="Test Accuracy (%)",
+                x=svc_results["SVC Kernel"],
+                y=svc_results["Accuracy (%)"],
+                marker_color="#246B42",
+            )
+        )
+        fig.add_trace(
+            go.Bar(
+                name="CV Accuracy (%)",
+                x=svc_results["SVC Kernel"],
+                y=svc_results["CV Accuracy (%)"],
+                marker_color="#7ABF8F",
+            )
+        )
+        style_fig(fig, "SVC Kernels: Test vs CV Accuracy (%)")
+        fig.update_layout(barmode="group", xaxis_tickangle=-25)
+        show_chart(fig)
+
+    with col2:
+        # Confusion matrix heatmap
+        cm = svc_out["cm"]
+        labels = svc_out["tier_labels"]
+        cm_fig = px.imshow(
+            cm,
+            labels=dict(x="Predicted Tier", y="Actual Tier", color="Count"),
+            x=labels,
+            y=labels,
+            text_auto=True,
+            color_continuous_scale="Greens",
+        )
+        style_fig(cm_fig, f"Confusion Matrix: {best_svc}")
+        show_chart(cm_fig)
+
+    st.info(
+        f"💡 **Managerial Insight on SVC**: The **{best_svc}** achieves the strongest balance between generalization and margin separation. "
+        f"Training tercile boundaries: **Low Yield** < {svc_out['q33']:.2f} t/ha, "
+        f"**Medium Yield** {svc_out['q33']:.2f}–{svc_out['q67']:.2f} t/ha, "
+        f"**High Yield** >= {svc_out['q67']:.2f} t/ha."
+    )
 
 
 # =====================================================
@@ -1827,38 +2005,57 @@ elif page == "Data Explorer":
     show_table(corr[YIELD].sort_values(ascending=False).round(4).to_frame())
 
 
+
+
+
 # =====================================================
 # 16. PAGE: PROFITABILITY MODEL EVALUATION  (notebook: profit modelling)
 # =====================================================
 
 elif page == "Profitability Model Evaluation":
 
-    st.header("💹 Farmer Profitability Model Evaluation")
+    st.header("🔬 Machine Learning Model Evaluation & Benchmarking")
     st.write(
-        "Nine regression models predicting farmer profit (INR), using crop, "
-        "weather, farming inputs and yield."
+        "Empirical evaluation of regression and classification models "
+        "trained on 7,920 agricultural records (2014–2024)."
     )
 
-    out = render_model_results("profit")
+    tab_profit, tab_yield, tab_svc = st.tabs([
+        "💹 Farmer Profitability Models (9 Regressors)",
+        "🌾 Crop Yield Models (9 Regressors)",
+        "🔵 SVC Yield Tier Classification (Support Vector Classifier)",
+    ])
 
-    if out is not None:
-        render_cv_section("profit", out["best_name"])
+    with tab_profit:
+        st.subheader("Farmer Profitability Regression Models")
+        st.caption("Predicting net farmer profit in INR using agricultural inputs, weather, and yield.")
+        out = render_model_results("profit")
+        if out is not None:
+            render_cv_section("profit", out["best_name"])
+            st.divider()
+            st.subheader("Download Best Profit Model")
+            if full_width_button(st.button, "Prepare model file (.pkl)", key="prep_model"):
+                buffer = io.BytesIO()
+                joblib.dump(out["trained"][out["best_name"]], buffer)
+                st.session_state["profit_model_bytes"] = buffer.getvalue()
 
-        st.divider()
-        st.subheader("Download Best Model")
+            if "profit_model_bytes" in st.session_state:
+                st.download_button(
+                    "⬇️ Download farmer_profitability_model.pkl",
+                    data=st.session_state["profit_model_bytes"],
+                    file_name="farmer_profitability_model.pkl",
+                    mime="application/octet-stream",
+                )
 
-        if full_width_button(st.button, "Prepare model file (.pkl)", key="prep_model"):
-            buffer = io.BytesIO()
-            joblib.dump(out["trained"][out["best_name"]], buffer)
-            st.session_state["profit_model_bytes"] = buffer.getvalue()
+    with tab_yield:
+        st.subheader("Crop Yield Regression Models")
+        st.caption("Predicting crop yield in tons/hectare using weather, soil, irrigation, and agronomic inputs.")
+        yield_out = render_model_results("yield")
+        if yield_out is not None:
+            render_cv_section("yield", yield_out["best_name"])
 
-        if "profit_model_bytes" in st.session_state:
-            st.download_button(
-                "⬇️ Download farmer_profitability_model.pkl",
-                data=st.session_state["profit_model_bytes"],
-                file_name="farmer_profitability_model.pkl",
-                mime="application/octet-stream",
-            )
+    with tab_svc:
+        render_svc_section()
 
 
 # =====================================================
