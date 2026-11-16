@@ -650,6 +650,8 @@ def load_or_train_model(data, target):
     if model_path.exists():
         try:
             model = joblib.load(model_path)
+            if hasattr(model, "feature_names_in_"):
+                features = list(model.feature_names_in_)
             return model, features, True
         except Exception:
             pass
@@ -2127,11 +2129,12 @@ elif page == "Crop Yield Forecasting":
 
         with st.spinner("Forecasting crop yield using best model (R² > 81%)..."):
             model, features, from_file = load_or_train_model(df, YIELD)
+            required_cols = list(model.feature_names_in_) if hasattr(model, "feature_names_in_") else features
             input_data = pd.DataFrame([inputs])
-            for col in features:
+            for col in required_cols:
                 if col not in input_data.columns:
                     input_data[col] = 0.0
-            input_data = input_data[features]
+            input_data = input_data[required_cols]
             prediction = float(model.predict(input_data)[0])
 
         state = inputs["State"]
@@ -2315,11 +2318,12 @@ elif page == "Farmer Profitability Prediction":
 
         with st.spinner("Estimating farmer profitability using champion model (R² ≈ 86%)..."):
             model, features, from_file = load_or_train_model(df, PROFIT)
+            required_cols = list(model.feature_names_in_) if hasattr(model, "feature_names_in_") else features
             input_data = pd.DataFrame([inputs])
-            for col in features:
+            for col in required_cols:
                 if col not in input_data.columns:
                     input_data[col] = 0.0
-            input_data = input_data[features]
+            input_data = input_data[required_cols]
             prediction = float(model.predict(input_data)[0])
 
         state = inputs["State"]
@@ -2376,14 +2380,15 @@ elif page == "Farmer Profitability Prediction":
             scenario_multipliers = [-0.20, -0.10, 0.0, 0.10, 0.20]
             scenario_labels = ["-20% Yield", "-10% Yield", "Expected (Base)", "+10% Yield", "+20% Yield"]
             scenario_profits = []
+            required_cols = list(model.feature_names_in_) if hasattr(model, "feature_names_in_") else features
             for mult in scenario_multipliers:
                 temp_in = inputs.copy()
                 temp_in[YIELD] = max(0.1, exp_yield * (1 + mult))
                 temp_df = pd.DataFrame([temp_in])
-                for col in features:
+                for col in required_cols:
                     if col not in temp_df.columns:
                         temp_df[col] = 0.0
-                temp_df = temp_df[features]
+                temp_df = temp_df[required_cols]
                 scenario_profits.append(float(model.predict(temp_df)[0]))
 
             sens_df = pd.DataFrame({
