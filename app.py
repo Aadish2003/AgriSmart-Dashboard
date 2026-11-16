@@ -1347,8 +1347,8 @@ def open_agrosense_ai_dialog():
         padding: 14px 12px;
     }
     
-    /* Suggestion Query Buttons Styling (Clean, Bold & 100% Readable) */
-    div[data-testid="stDialog"] div[data-testid="stHorizontalBlock"] div[data-testid="stButton"] button {
+    /* Suggestion Query Buttons Styling (Clean, Bold & 100% Readable) - Scoped to Main Chat Column */
+    div[data-testid="stDialog"] div[data-testid="stColumn"]:last-child div[data-testid="stHorizontalBlock"] div[data-testid="stButton"] button {
         background-color: #FFFFFF !important;
         border: 1.5px solid #A3D9B5 !important;
         border-radius: 8px !important;
@@ -1361,12 +1361,55 @@ def open_agrosense_ai_dialog():
         box-shadow: 0 1px 4px rgba(23, 69, 45, 0.05) !important;
         transition: all 0.2s ease !important;
     }
-    div[data-testid="stDialog"] div[data-testid="stHorizontalBlock"] div[data-testid="stButton"] button:hover {
+    div[data-testid="stDialog"] div[data-testid="stColumn"]:last-child div[data-testid="stHorizontalBlock"] div[data-testid="stButton"] button:hover {
         background-color: #E8F5E9 !important;
         border-color: #246B42 !important;
         color: #0E2A1B !important;
         box-shadow: 0 4px 14px rgba(23, 69, 45, 0.15) !important;
         transform: translateY(-2px) !important;
+    }
+
+    /* Left Sidebar History Session Buttons Styling (Always High-Contrast & Visible) */
+    div[data-testid="stDialog"] div[data-testid="stColumn"]:first-child div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"]:first-child button {
+        border-radius: 8px !important;
+        font-size: 0.82rem !important;
+        font-weight: 700 !important;
+        text-align: left !important;
+        justify-content: flex-start !important;
+        padding: 6px 10px !important;
+        min-height: 38px !important;
+        width: 100% !important;
+        box-shadow: none !important;
+    }
+    div[data-testid="stDialog"] div[data-testid="stColumn"]:first-child div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"]:first-child button[kind="primary"] {
+        background-color: #246B42 !important;
+        color: #FFFFFF !important;
+        border: 1.5px solid #246B42 !important;
+    }
+    div[data-testid="stDialog"] div[data-testid="stColumn"]:first-child div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"]:first-child button[kind="secondary"] {
+        background-color: #FFFFFF !important;
+        color: #17452D !important;
+        border: 1px solid #DCE7DD !important;
+    }
+    div[data-testid="stDialog"] div[data-testid="stColumn"]:first-child div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"]:first-child button:hover {
+        background-color: #E8F5E9 !important;
+        color: #0E2A1B !important;
+        border-color: #246B42 !important;
+    }
+
+    /* Left Sidebar Trash / Delete Button Styling */
+    div[data-testid="stDialog"] div[data-testid="stColumn"]:first-child div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"]:last-child button {
+        background-color: #F4F8F5 !important;
+        border: 1px solid #DCE7DD !important;
+        border-radius: 8px !important;
+        padding: 4px !important;
+        min-height: 38px !important;
+        justify-content: center !important;
+        box-shadow: none !important;
+    }
+    div[data-testid="stDialog"] div[data-testid="stColumn"]:first-child div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"]:last-child button:hover {
+        background-color: #FFEBEE !important;
+        border-color: #EF9A9A !important;
     }
 
     /* Primary Action Buttons (e.g. + New chat) */
@@ -1515,7 +1558,7 @@ def open_agrosense_ai_dialog():
                 is_active = (s["id"] == st.session_state["active_session_id"])
                 c_title, c_del = st.columns([5, 1])
                 with c_title:
-                    btn_label = f"💬 {s.get('title', 'Session')[:18]}"
+                    btn_label = f"📝 {s.get('title', 'Session')[:18]}"
                     btn_type = "primary" if is_active else "secondary"
                     if st.button(btn_label, key=f"hist_s_{s['id']}", use_container_width=True, type=btn_type):
                         st.session_state["active_session_id"] = s["id"]
@@ -1675,6 +1718,11 @@ def render_floating_chat_bubble():
         st.session_state["_active_page_name"] = page
         st.session_state["show_chat_dialog"] = False
 
+    # If the chat dialog is currently open, open dialog and DO NOT render the floating bubble into the DOM!
+    if st.session_state.get("show_chat_dialog", False):
+        open_agrosense_ai_dialog()
+        return
+
     # 1. Floating Bubble CSS with Continuous Blinking Glow and Speech Popover
     st.markdown("""
     <style>
@@ -1746,12 +1794,7 @@ def render_floating_chat_bubble():
     }
 
     /* Fixed Floating Chat Bubble Button Styling with Continuous Blink */
-    div[data-testid="stElementContainer"]:has(.agro-bubble-fixed-container) + div[data-testid="stElementContainer"] button,
-    div:has(> .agro-bubble-fixed-container) + div[data-testid="stButton"] button,
-    div[data-testid="stButton"]:has(button#agro_floating_btn) button,
-    button[key="agro_floating_btn"],
-    button:has(p:contains("💬")),
-    div.stButton > button#agro_floating_btn {
+    div[data-testid="stElementContainer"]:has(.agro-bubble-fixed-container) + div[data-testid="stElementContainer"] button {
         position: fixed !important;
         bottom: 26px !important;
         right: 28px !important;
@@ -1776,22 +1819,9 @@ def render_floating_chat_bubble():
         animation: agro-bubble-blink-pulse 2s infinite ease-in-out !important;
         transition: transform 0.25s ease !important;
     }
-    div:has(> .agro-bubble-fixed-container) + div[data-testid="stButton"] button:hover,
-    button[key="agro_floating_btn"]:hover,
-    button:has(p:contains("💬")):hover {
+    div[data-testid="stElementContainer"]:has(.agro-bubble-fixed-container) + div[data-testid="stElementContainer"] button:hover {
         transform: scale(1.15) !important;
         border-color: #FFFFFF !important;
-    }
-
-    /* Floating bubble and speech popover must hide ONLY when dialog is active on screen */
-    body:has(div[data-testid="stDialog"]) .agro-speech-popover,
-    body:has(div[data-testid="stDialog"]) div:has(> .agro-bubble-fixed-container) + div[data-testid="stButton"] button,
-    body:has(div[data-testid="stDialog"]) div[data-testid="stElementContainer"]:has(.agro-bubble-fixed-container) + div[data-testid="stElementContainer"] button,
-    body:has(div[data-testid="stDialog"]) button[key="agro_floating_btn"],
-    body:has(div[data-testid="stDialog"]) button:has(p:contains("💬")) {
-        display: none !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
     }
 
     /* Mobile Responsive Sizing */
@@ -1802,8 +1832,7 @@ def render_floating_chat_bubble():
             font-size: 0.76rem !important;
             padding: 6px 11px !important;
         }
-        div:has(> .agro-bubble-fixed-container) + div[data-testid="stButton"] button,
-        button[key="agro_floating_btn"] {
+        div[data-testid="stElementContainer"]:has(.agro-bubble-fixed-container) + div[data-testid="stElementContainer"] button {
             bottom: 18px !important;
             right: 18px !important;
             width: 56px !important;
@@ -1825,59 +1854,55 @@ def render_floating_chat_bubble():
     """, unsafe_allow_html=True)
 
     # 2. Floating Button (Small Circular Bubble)
-    clicked = st.button("💬", key="agro_floating_btn", help="Open AgroSense AI Copilot")
-    if clicked:
+    if st.button("💬", key="agro_floating_btn", help="Open AgroSense AI Copilot"):
         st.session_state["show_chat_dialog"] = True
+        open_agrosense_ai_dialog()
 
-    # 3. JavaScript Helper for universal browser positioning & animation with MutationObserver
+    # 3. JavaScript Helper strictly scoped to the immediate sibling button
     st.components.v1.html("""
     <script>
     (function() {
         function setupBubble() {
             try {
                 const doc = window.parent.document;
-                const btns = doc.querySelectorAll('button');
-                btns.forEach(b => {
-                    if (b.innerText.trim() === '💬' || b.textContent.includes('💬') || b.getAttribute('aria-label') === 'agro_floating_btn') {
-                        b.style.position = 'fixed';
-                        b.style.bottom = '26px';
-                        b.style.right = '28px';
-                        b.style.zIndex = '9999999';
-                        b.style.width = '62px';
-                        b.style.height = '62px';
-                        b.style.minWidth = '62px';
-                        b.style.minHeight = '62px';
-                        b.style.borderRadius = '50%';
-                        b.style.background = 'linear-gradient(135deg, #17452D 0%, #246B42 55%, #00C853 100%)';
-                        b.style.color = '#FFFFFF';
-                        b.style.border = '2.5px solid #69F0AE';
-                        b.style.fontSize = '28px';
-                        b.style.display = 'flex';
-                        b.style.alignItems = 'center';
-                        b.style.justifyContent = 'center';
-                        b.style.cursor = 'pointer';
-                        b.style.padding = '0';
-                        b.style.margin = '0';
-                        b.style.animation = 'agro-bubble-blink-pulse 2s infinite ease-in-out';
+                const container = doc.querySelector('.agro-bubble-fixed-container');
+                if (container) {
+                    const parent = container.closest('[data-testid="stElementContainer"]');
+                    if (parent && parent.nextElementSibling) {
+                        const btn = parent.nextElementSibling.querySelector('button');
+                        if (btn && btn.innerText.trim() === '💬') {
+                            btn.style.position = 'fixed';
+                            btn.style.bottom = '26px';
+                            btn.style.right = '28px';
+                            btn.style.zIndex = '9999999';
+                            btn.style.width = '62px';
+                            btn.style.height = '62px';
+                            btn.style.minWidth = '62px';
+                            btn.style.minHeight = '62px';
+                            btn.style.borderRadius = '50%';
+                            btn.style.background = 'linear-gradient(135deg, #17452D 0%, #246B42 55%, #00C853 100%)';
+                            btn.style.color = '#FFFFFF';
+                            btn.style.border = '2.5px solid #69F0AE';
+                            btn.style.fontSize = '28px';
+                            btn.style.display = 'flex';
+                            btn.style.alignItems = 'center';
+                            btn.style.justifyContent = 'center';
+                            btn.style.cursor = 'pointer';
+                            btn.style.padding = '0';
+                            btn.style.margin = '0';
+                            btn.style.animation = 'agro-bubble-blink-pulse 2s infinite ease-in-out';
+                        }
                     }
-                });
+                }
             } catch(e) {}
         }
         setupBubble();
-        setTimeout(setupBubble, 100);
-        setTimeout(setupBubble, 400);
-        setTimeout(setupBubble, 1000);
-        try {
-            const observer = new MutationObserver(setupBubble);
-            observer.observe(window.parent.document.body, { childList: true, subtree: true });
-        } catch(e) {}
+        setTimeout(setupBubble, 80);
+        setTimeout(setupBubble, 300);
+        setTimeout(setupBubble, 800);
     })();
     </script>
     """, height=0, width=0)
-
-    # 4. Open Dialog if clicked or active
-    if clicked or st.session_state.get("show_chat_dialog", False):
-        open_agrosense_ai_dialog()
 
 
 
