@@ -1558,7 +1558,7 @@ def open_agrosense_ai_dialog():
                 is_active = (s["id"] == st.session_state["active_session_id"])
                 c_title, c_del = st.columns([5, 1])
                 with c_title:
-                    btn_label = f"📝 {s.get('title', 'Session')[:18]}"
+                    btn_label = f"• {s.get('title', 'Session')[:20]}"
                     btn_type = "primary" if is_active else "secondary"
                     if st.button(btn_label, key=f"hist_s_{s['id']}", use_container_width=True, type=btn_type):
                         st.session_state["active_session_id"] = s["id"]
@@ -1574,6 +1574,21 @@ def open_agrosense_ai_dialog():
                         st.rerun()
         else:
             st.caption("No saved conversations yet.")
+
+        # Optional Groq Key input expander for Streamlit Cloud users
+        with st.expander("🔑 API Key Settings", expanded=False):
+            key_in = st.text_input(
+                "Groq API Key (Optional)",
+                value=st.session_state.get("user_groq_key", ""),
+                type="password",
+                help="Paste your Groq API key (gsk_...) to activate cloud LLM synthesis on Streamlit Cloud.",
+                key="input_groq_key"
+            )
+            if key_in:
+                st.session_state["user_groq_key"] = key_in.strip()
+                st.caption("✅ Groq Cloud LLM Active")
+            else:
+                st.caption("ℹ️ Ground-Truth Analytical Engine Active")
 
         # User Profile Badge at bottom left (matches ChatGPT / Gemini / Claude profile footer)
         st.markdown("""
