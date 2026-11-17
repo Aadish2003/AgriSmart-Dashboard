@@ -17,8 +17,11 @@ import os
 import json
 import re
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
+
+# Indian Standard Time (IST) timezone (UTC+5:30) for accurate Indian Agribusiness timestamping
+IST = timezone(timedelta(hours=5, minutes=30))
 import numpy as np
 import pandas as pd
 import plotly.express as px
@@ -827,12 +830,12 @@ def save_all_sessions(sessions: list[dict]):
         pass
 
 def create_new_session(title: str = "New Session") -> str:
-    session_id = datetime.now().strftime("%Y%m%d_%H%M%S_") + uuid.uuid4().hex[:6]
+    session_id = datetime.now(IST).strftime("%Y%m%d_%H%M%S_") + uuid.uuid4().hex[:6]
     sessions = load_all_sessions()
     sessions.insert(0, {
         "id": session_id,
         "title": title,
-        "created_at": datetime.now().strftime("%d %b %Y, %I:%M %p"),
+        "created_at": datetime.now(IST).strftime("%d %b %Y, %I:%M %p"),
         "messages": []
     })
     save_all_sessions(sessions)
@@ -846,7 +849,7 @@ def append_message_to_session(session_id: str, role: str, content: str, chart_ti
                 "role": role,
                 "content": content,
                 "chart_title": chart_title,
-                "timestamp": datetime.now().strftime("%I:%M %p")
+                "timestamp": datetime.now(IST).strftime("%I:%M %p")
             })
             if s["title"] in ["New Session", "New Agricultural Briefing", "Initial AgriSmart Briefing", "Initial Agricultural Briefing"] and role == "user":
                 s["title"] = content[:35] + ("..." if len(content) > 35 else "")

@@ -7,8 +7,11 @@
 # =====================================================
 
 import io
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
+
+# Indian Standard Time (IST) timezone (UTC+5:30)
+IST = timezone(timedelta(hours=5, minutes=30))
 
 import joblib
 import numpy as np
@@ -1724,7 +1727,7 @@ def open_agrosense_ai_dialog():
 
                 # --- Render and Process Active Query (Instantaneous without reload/blink) ---
                 if active_query:
-                    now_str = datetime.now().strftime("%I:%M %p")
+                    now_str = datetime.now(IST).strftime("%I:%M %p")
                     # 1. Render user query immediately in chat box
                     with st.chat_message("user", avatar="🧑‍🌾"):
                         st.markdown(f"**Agribusiness Strategist** • *{now_str}*")
