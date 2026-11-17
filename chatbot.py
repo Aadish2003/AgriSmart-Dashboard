@@ -848,8 +848,8 @@ def append_message_to_session(session_id: str, role: str, content: str, chart_ti
                 "chart_title": chart_title,
                 "timestamp": datetime.now().strftime("%I:%M %p")
             })
-            if s["title"] in ["New Session", "Initial AgriSmart Briefing"] and role == "user":
-                s["title"] = content[:42] + ("..." if len(content) > 42 else "")
+            if s["title"] in ["New Session", "New Agricultural Briefing", "Initial AgriSmart Briefing", "Initial Agricultural Briefing"] and role == "user":
+                s["title"] = content[:35] + ("..." if len(content) > 35 else "")
             break
     save_all_sessions(sessions)
 

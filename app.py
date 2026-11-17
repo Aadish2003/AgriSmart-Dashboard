@@ -1233,6 +1233,20 @@ def open_agrosense_ai_dialog():
         overflow: hidden !important;
     }
 
+    /* Complete elimination of blink / flicker / dimming during interaction */
+    div[data-testid="stDialog"],
+    div[data-testid="stDialog"] * {
+        transition: none !important;
+        animation: none !important;
+    }
+    div[data-testid="stDialog"] [data-st-stale="true"],
+    div[data-testid="stDialog"] [aria-busy="true"],
+    div[data-testid="stDialog"] .st-emotion-cache-16idsys {
+        opacity: 1 !important;
+        filter: none !important;
+        transition: none !important;
+    }
+
     /* Dialog base modal styling - Solid opaque white with emerald accent */
     div[data-testid="stDialog"] [role="dialog"],
     div[data-testid="stDialog"] > div {
@@ -1508,6 +1522,25 @@ def open_agrosense_ai_dialog():
     </style>
     """, unsafe_allow_html=True)
 
+    # Callback helpers for seamless, instant state transitions without reload blinks
+    def cb_switch_session(sid):
+        st.session_state["active_session_id"] = sid
+
+    def cb_new_chat():
+        new_id = chatbot.create_new_session("New Agricultural Briefing")
+        st.session_state["active_session_id"] = new_id
+
+    def cb_delete_chat(sid):
+        chatbot.delete_session(sid)
+        rem = chatbot.load_all_sessions()
+        if rem:
+            st.session_state["active_session_id"] = rem[0]["id"]
+        else:
+            st.session_state["active_session_id"] = chatbot.create_new_session("New Agricultural Briefing")
+
+    def cb_select_suggestion(prompt_text):
+        st.session_state["_pending_chat_query"] = prompt_text
+
     # Initialize active session
     if "active_session_id" not in st.session_state:
         existing = chatbot.load_all_sessions()
@@ -1527,7 +1560,7 @@ def open_agrosense_ai_dialog():
     # --- TWO-COLUMN CHATGPT / GEMINI / CLAUDE LAYOUT ---
     col_history, col_main = st.columns([1, 2.7], gap="small")
 
-    pending_query = None
+    pending_query = st.session_state.pop("_pending_chat_query", None)
 
     # =========================================================================
     # LEFT COLUMN: CHAT HISTORY SIDEBAR (Matches ChatGPT / Gemini / Claude)
@@ -1545,10 +1578,7 @@ def open_agrosense_ai_dialog():
         """, unsafe_allow_html=True)
 
         # ➕ New chat pill button (just like in ChatGPT / Gemini / Claude screenshots!)
-        if st.button("➕ New chat", key="btn_new_chat_sidebar", use_container_width=True):
-            new_id = chatbot.create_new_session("New Agricultural Briefing")
-            st.session_state["active_session_id"] = new_id
-            st.rerun()
+        st.button("➕ New chat", key="btn_new_chat_sidebar", use_container_width=True, on_click=cb_new_chat)
 
         st.markdown('<p style="font-size:0.75rem; color:#205B38; font-weight:800; text-transform:uppercase; margin-top:10px; margin-bottom:6px; letter-spacing:0.6px;">Recent Briefings</p>', unsafe_allow_html=True)
 
@@ -1568,18 +1598,22 @@ def open_agrosense_ai_dialog():
                 with c_title:
                     btn_label = f"• {s.get('title', 'Session')[:20]}"
                     btn_type = "primary" if is_active else "secondary"
-                    if st.button(btn_label, key=f"hist_s_{s['id']}_{idx}", use_container_width=True, type=btn_type):
-                        st.session_state["active_session_id"] = s["id"]
-                        st.rerun()
+                    st.button(
+                        btn_label,
+                        key=f"hist_s_{s['id']}_{idx}",
+                        use_container_width=True,
+                        type=btn_type,
+                        on_click=cb_switch_session,
+                        args=(s["id"],)
+                    )
                 with c_del:
-                    if st.button("🗑️", key=f"hist_del_{s['id']}_{idx}", help="Delete this session"):
-                        chatbot.delete_session(s["id"])
-                        rem = chatbot.load_all_sessions()
-                        if rem:
-                            st.session_state["active_session_id"] = rem[0]["id"]
-                        else:
-                            st.session_state["active_session_id"] = chatbot.create_new_session("New Session")
-                        st.rerun()
+                    st.button(
+                        "🗑️",
+                        key=f"hist_del_{s['id']}_{idx}",
+                        help="Delete this session",
+                        on_click=cb_delete_chat,
+                        args=(s["id"],)
+                    )
         else:
             st.caption("No saved conversations yet.")
 
@@ -1636,9 +1670,21 @@ def open_agrosense_ai_dialog():
         # =====================================================================
         # SCROLLABLE MESSAGE CONTAINER (ONLY MESSAGES SCROLL, FIXED 390PX)
         # =====================================================================
-        with st.container(height=390, border=False, autoscroll=True):
-            # --- If no messages: Hero Greeting & Suggestion Chips (Gemini/Claude style) ---
-            if not messages:
+        msg_container = st.container(height=390, border=False)
+
+        # =====================================================================
+        # PINNED INPUT BAR (OUTSIDE THE CONTAINER, PERMANENTLY FIXED AT BOTTOM)
+        # =====================================================================
+        user_input = st.chat_input(
+            "Ask AgroSense AI anything about Indian crops, yields, profits, states, soils, weather, ML models…",
+            key="gemini_style_chat_input"
+        )
+
+        active_query = pending_query or user_input
+
+        with msg_container:
+            # --- If no messages and no query: Hero Greeting & Suggestion Chips (Gemini/Claude style) ---
+            if not messages and not active_query:
                 st.markdown("""
                 <div style="text-align:center; padding: 4px 10px 4px 10px;">
                     <div style="font-size: 1.8rem; margin-bottom: 2px;">🌾</div>
@@ -1651,19 +1697,13 @@ def open_agrosense_ai_dialog():
                 st.markdown('<p style="font-size:0.75rem; color:#205B38; font-weight:800; text-transform:uppercase; margin-bottom:6px; letter-spacing:0.6px;">Suggested Inquiries</p>', unsafe_allow_html=True)
                 sc1, sc2 = st.columns(2)
                 with sc1:
-                    if st.button("🌾 Which state produces highest Wheat yield?", key="sug_chip_1", use_container_width=True):
-                        pending_query = "Which state produces the highest Wheat yield and what are the agronomic drivers?"
-                    if st.button("💰 What is the most profitable crop in Kharif?", key="sug_chip_2", use_container_width=True):
-                        pending_query = "What is the most profitable crop during the Kharif season and what is its net return?"
-                    if st.button("🪨 Optimal soil suitability for Cotton & Rice", key="sug_chip_3", use_container_width=True):
-                        pending_query = "Compare crop productivity across soil classifications and identify the best soil for Cotton and Rice."
+                    st.button("🌾 Which state produces highest Wheat yield?", key="sug_chip_1", use_container_width=True, on_click=cb_select_suggestion, args=("Which state produces the highest Wheat yield and what are the agronomic drivers?",))
+                    st.button("💰 What is the most profitable crop in Kharif?", key="sug_chip_2", use_container_width=True, on_click=cb_select_suggestion, args=("What is the most profitable crop during the Kharif season and what is its net return?",))
+                    st.button("🪨 Optimal soil suitability for Cotton & Rice", key="sug_chip_3", use_container_width=True, on_click=cb_select_suggestion, args=("Compare crop productivity across soil classifications and identify the best soil for Cotton and Rice.",))
                 with sc2:
-                    if st.button("📈 10-year historical national yield trajectory", key="sug_chip_4", use_container_width=True):
-                        pending_query = "Show the 10-year historical national crop yield trajectory from 2014 to 2024."
-                    if st.button("💧 Drip vs Canal vs Sprinkler efficiency", key="sug_chip_5", use_container_width=True):
-                        pending_query = "Compare agricultural yield and farmer profit between Drip, Canal, and Sprinkler irrigation."
-                    if st.button("🤖 How is farmer profitability predicted by ML?", key="sug_chip_6", use_container_width=True):
-                        pending_query = "Explain how machine learning predicts farmer profitability and what are the dominant features."
+                    st.button("📈 10-year historical national yield trajectory", key="sug_chip_4", use_container_width=True, on_click=cb_select_suggestion, args=("Show the 10-year historical national crop yield trajectory from 2014 to 2024.",))
+                    st.button("💧 Drip vs Canal vs Sprinkler efficiency", key="sug_chip_5", use_container_width=True, on_click=cb_select_suggestion, args=("Compare agricultural yield and farmer profit between Drip, Canal, and Sprinkler irrigation.",))
+                    st.button("🤖 How is farmer profitability predicted by ML?", key="sug_chip_6", use_container_width=True, on_click=cb_select_suggestion, args=("Explain how machine learning predicts farmer profitability and what are the dominant features.",))
             else:
                 # --- Render Chat Messages (ChatGPT / Claude message bubble cards) ---
                 for msg in messages:
@@ -1679,51 +1719,50 @@ def open_agrosense_ai_dialog():
                             if msg.get("chart_title"):
                                 fig = chatbot.generate_dynamic_chart(msg.get("chart_title"))
                                 if fig is not None:
-                                    st.plotly_chart(fig, use_container_width=True)
+                                    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
-        # =====================================================================
-        # PINNED INPUT BAR (OUTSIDE THE CONTAINER, PERMANENTLY FIXED AT BOTTOM)
-        # =====================================================================
-        # --- Centered Prompt Input Bar (Matching ChatGPT / Gemini / Claude screenshots) ---
-        user_input = st.chat_input(
-            "Ask AgroSense AI anything about Indian crops, yields, profits, states, soils, weather, ML models…",
-            key="gemini_style_chat_input"
-        )
+                # --- Render and Process Active Query (Instantaneous without reload/blink) ---
+                if active_query:
+                    now_str = datetime.now().strftime("%I:%M %p")
+                    # 1. Render user query immediately in chat box
+                    with st.chat_message("user", avatar="🧑‍🌾"):
+                        st.markdown(f"**Agribusiness Strategist** • *{now_str}*")
+                        st.markdown(active_query)
 
-        query = pending_query or user_input
-
-        if query:
-            # 1. Append user query to session
-            chatbot.append_message_to_session(
-                st.session_state["active_session_id"],
-                role="user",
-                content=query
-            )
-
-            # 2. Thinking indicator
-            with st.spinner("🤖 AgroSense AI is thinking... Analyzing 7,920 records & synthesizing executive solution..."):
-                try:
-                    session_history = [
-                        {"role": m["role"], "content": m["content"]}
-                        for m in current_session.get("messages", [])
-                    ]
-                    answer, fig = chatbot.chat(query, session_history)
-
-                    chart_title = query if fig is not None else None
                     chatbot.append_message_to_session(
                         st.session_state["active_session_id"],
-                        role="assistant",
-                        content=answer,
-                        chart_title=chart_title
-                    )
-                except Exception as e:
-                    chatbot.append_message_to_session(
-                        st.session_state["active_session_id"],
-                        role="assistant",
-                        content=f"⚠️ Briefing synthesis halted: `{e}`. Please check system connectivity and credentials."
+                        role="user",
+                        content=active_query
                     )
 
-            st.rerun()
+                    # 2. Render assistant response directly in container
+                    with st.chat_message("assistant", avatar="🤖"):
+                        st.markdown(f"**AgroSense AI Executive Brief** • *{now_str}*")
+                        with st.spinner("🤖 AgroSense AI is thinking... Analyzing 7,920 records & synthesizing executive solution..."):
+                            try:
+                                session_history = [
+                                    {"role": m["role"], "content": m["content"]}
+                                    for m in messages
+                                ]
+                                answer, fig = chatbot.chat(active_query, session_history)
+                                st.markdown(answer)
+                                chart_title = active_query if fig is not None else None
+                                if fig is not None:
+                                    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                                chatbot.append_message_to_session(
+                                    st.session_state["active_session_id"],
+                                    role="assistant",
+                                    content=answer,
+                                    chart_title=chart_title
+                                )
+                            except Exception as e:
+                                err_msg = f"⚠️ Briefing synthesis halted: `{e}`. Please check system connectivity and credentials."
+                                st.markdown(err_msg)
+                                chatbot.append_message_to_session(
+                                    st.session_state["active_session_id"],
+                                    role="assistant",
+                                    content=err_msg
+                                )
 
 
 # =====================================================
