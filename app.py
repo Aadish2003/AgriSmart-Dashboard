@@ -1552,19 +1552,27 @@ def open_agrosense_ai_dialog():
 
         st.markdown('<p style="font-size:0.75rem; color:#205B38; font-weight:800; text-transform:uppercase; margin-top:10px; margin-bottom:6px; letter-spacing:0.6px;">Recent Briefings</p>', unsafe_allow_html=True)
 
-        # List of past chat sessions (clean, naturally fitted, no empty dead space!)
+        # List of past chat sessions (clean, deduplicated & bulletproof keys)
         if all_sessions:
-            for s in all_sessions[:5]:
+            seen_ids = set()
+            unique_sessions = []
+            for s in all_sessions:
+                sid = str(s.get("id", ""))
+                if sid and sid not in seen_ids:
+                    seen_ids.add(sid)
+                    unique_sessions.append(s)
+
+            for idx, s in enumerate(unique_sessions[:5]):
                 is_active = (s["id"] == st.session_state["active_session_id"])
                 c_title, c_del = st.columns([5, 1])
                 with c_title:
                     btn_label = f"• {s.get('title', 'Session')[:20]}"
                     btn_type = "primary" if is_active else "secondary"
-                    if st.button(btn_label, key=f"hist_s_{s['id']}", use_container_width=True, type=btn_type):
+                    if st.button(btn_label, key=f"hist_s_{s['id']}_{idx}", use_container_width=True, type=btn_type):
                         st.session_state["active_session_id"] = s["id"]
                         st.rerun()
                 with c_del:
-                    if st.button("🗑️", key=f"hist_del_{s['id']}", help="Delete this session"):
+                    if st.button("🗑️", key=f"hist_del_{s['id']}_{idx}", help="Delete this session"):
                         chatbot.delete_session(s["id"])
                         rem = chatbot.load_all_sessions()
                         if rem:

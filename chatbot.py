@@ -16,6 +16,7 @@ Guarantees:
 import os
 import json
 import re
+import uuid
 from datetime import datetime
 from pathlib import Path
 import numpy as np
@@ -805,7 +806,16 @@ def load_all_sessions() -> list[dict]:
         return []
     try:
         with open(HISTORY_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
+            raw = json.load(f)
+            # Deduplicate by session ID
+            seen = set()
+            unique = []
+            for s in raw:
+                sid = str(s.get("id", ""))
+                if sid and sid not in seen:
+                    seen.add(sid)
+                    unique.append(s)
+            return unique
     except Exception:
         return []
 
@@ -817,7 +827,7 @@ def save_all_sessions(sessions: list[dict]):
         pass
 
 def create_new_session(title: str = "New Session") -> str:
-    session_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+    session_id = datetime.now().strftime("%Y%m%d_%H%M%S_") + uuid.uuid4().hex[:6]
     sessions = load_all_sessions()
     sessions.insert(0, {
         "id": session_id,
